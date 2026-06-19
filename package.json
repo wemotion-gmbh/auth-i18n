@@ -1,0 +1,41 @@
+{
+  "name": "@wemotion/auth-i18n",
+  "version": "0.1.0",
+  "description": "Zentraler i18n-Katalog (Deutsch, du/Moin) fuer Ory Kratos UI-Meldungen, gekeyt nach stabiler Message-ID. Einbinden ueberall, wo Kratos-Flows gerendert werden.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./locales/de.json": "./locales/de.json",
+    "./locales/en.json": "./locales/en.json",
+    "./ui/de.json": "./locales/ui.de.json",
+    "./app-copy/de.json": "./locales/app-copy.de.json"
+  },
+  "files": [
+    "dist",
+    "locales",
+    "courier-templates",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "sideEffects": false,
+  "license": "UNLICENSED",
+  "private": true,
+  "publishConfig": {
+    "access": "restricted"
+  }
+}
