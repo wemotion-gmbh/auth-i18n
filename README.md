@@ -106,10 +106,20 @@ für mehrsprachige Mails im Template selbst auf einen Identity-Trait verzweigen
   mit neuen Kratos-Releases (neue Strategien = neue IDs); unbekannte IDs rendern dank
   `text`-Fallback weiter (englisch), bis sie ergänzt werden.
 
-## Build
+## Einbinden (git dependency)
+
+Das Paket ist **source-first** (kein Build-Schritt beim Consumer): `main`/`exports`
+zeigen auf `src/index.ts`, der Consumer transpiliert es mit.
 
 ```sh
-npm install
-npm run build      # -> dist/ (ESM + CJS + d.ts)
-npm run typecheck
+pnpm add github:wemotion-gmbh/auth-i18n
 ```
+
+In **Next.js** das Paket transpilieren lassen (`next.config`):
+
+```ts
+const nextConfig = { transpilePackages: ["@wemotion/auth-i18n"] };
+```
+
+`pnpm install --frozen-lockfile` (CI/Docker) zieht den im Lockfile gepinnten Commit.
+Optionaler eigener Build/Typecheck im Paket-Repo: `pnpm run build` / `pnpm run typecheck`.
