@@ -12,5 +12,6 @@
     "skipLibCheck": true,
     "outDir": "dist"
   },
-  "include": ["src", "locales"]
+  "include": ["src", "locales"],
+  "exclude": ["src/**/*.test.ts"]
 }
