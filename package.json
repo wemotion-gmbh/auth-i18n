@@ -21,7 +21,8 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/*.test.ts"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

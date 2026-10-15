@@ -16,12 +16,28 @@
 export type Context = Record<string, unknown>;
 
 /**
+ * Whole minutes between `nowMs` and a unix timestamp, never negative. Rounded
+ * rather than floored: a 15-minute window reads "15", not "14", a moment after it
+ * began.
+ */
+function minutesBetween(unixSeconds: number, nowMs: number): number {
+  return Math.max(0, Math.round(Math.abs(unixSeconds * 1000 - nowMs) / 60_000));
+}
+
+/**
  * Bildet aus dem rohen Kratos-`context` die finale Werte-Map. Spiegelt die
  * Konventionen aus Orys `uiTextToFormattedMessage`:
  *  - Array-Werte erhalten zusaetzlich `<key>_list` (kommasepariert).
- *  - `<key>_unix` (Unix-Sekunden) erzeugt zusaetzlich `<key>` als lesbares Datum.
+ *  - `<key>_unix` (Unix-Sekunden) erzeugt zusaetzlich `<key>` als lesbares Datum
+ *    sowie `<key>_unix_until_minutes` / `<key>_unix_since_minutes` (ganze Minuten
+ *    bis bzw. seit dem Zeitpunkt, nie negativ). Kratos liefert nur den absoluten
+ *    Zeitpunkt; der Katalog fragt z. B. bei 1060001 nach
+ *    `{privileged_session_expires_at_unix_until_minutes}`. Schickt Kratos einen
+ *    dieser Schluessel selbst, gilt sein Wert.
+ *
+ * `nowMs` ist nur fuer Tests da; Default ist die aktuelle Zeit.
  */
-export function buildValues(context: Context = {}): Record<string, string> {
+export function buildValues(context: Context = {}, nowMs: number = Date.now()): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [key, value] of Object.entries(context)) {
     if (Array.isArray(value)) {
@@ -31,6 +47,16 @@ export function buildValues(context: Context = {}): Record<string, string> {
       const base = key.slice(0, -"_unix".length);
       out[key] = String(value);
       out[base] = new Date(value * 1000).toLocaleString("de-DE");
+      if (Number.isFinite(value)) {
+        const untilKey = `${key}_until_minutes`;
+        const sinceKey = `${key}_since_minutes`;
+        if (!(untilKey in context)) {
+          out[untilKey] = String(value * 1000 >= nowMs ? minutesBetween(value, nowMs) : 0);
+        }
+        if (!(sinceKey in context)) {
+          out[sinceKey] = String(value * 1000 <= nowMs ? minutesBetween(value, nowMs) : 0);
+        }
+      }
     } else if (value === null || value === undefined) {
       out[key] = "";
     } else {
@@ -43,8 +69,8 @@ export function buildValues(context: Context = {}): Record<string, string> {
 const PLACEHOLDER = /\{([a-zA-Z0-9_]+)\}/g;
 
 /** Ersetzt `{name}`-Platzhalter im Template durch die Werte aus `context`. */
-export function interpolate(template: string, context: Context = {}): string {
-  const values = buildValues(context);
+export function interpolate(template: string, context: Context = {}, nowMs: number = Date.now()): string {
+  const values = buildValues(context, nowMs);
   return template.replace(PLACEHOLDER, (match, name: string) =>
     Object.prototype.hasOwnProperty.call(values, name) ? values[name]! : match,
   );

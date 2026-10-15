@@ -52,7 +52,8 @@ const msgs = localizeFlowMessages(flow, { locale: "de" });
 ```
 
 Das Paket ist framework-agnostisch und dependency-frei (eigene `{name}`-Interpolation,
-inkl. Orys `context`-Konventionen wie `<key>_list` und `<key>_unix`). Läuft im Browser,
+inkl. Orys `context`-Konventionen wie `<key>_list`, `<key>_unix` und den daraus abgeleiteten
+`<key>_unix_until_minutes` / `<key>_unix_since_minutes`). Läuft im Browser,
 im Next-Server/BFF und in Edge-Runtimes.
 
 ### Drop-in im Hub
