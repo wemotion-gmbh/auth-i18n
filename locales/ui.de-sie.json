@@ -201,7 +201,7 @@
   "settings.profile.email.dialog.confirm": "Ja, Adresse ändern",
   "settings.profile.email.dialog.text": "Ihre neue E-Mail-Adresse lautet {email}. Die alte Adresse gilt danach sofort nicht mehr. Bitte prüfen Sie die Schreibweise genau.",
   "settings.profile.email.dialog.title": "Stimmt die neue E-Mail-Adresse?",
-  "settings.profile.email.hint": "Wir senden einen Code an die neue Adresse. Die alte Adresse gilt sofort nicht mehr für die Anmeldung und zum Zurücksetzen des Passworts, auch bevor Sie die neue bestätigt haben. Wenn Sie sich ohne Passwort anmelden, sperrt Sie ein Tippfehler aus. Prüfen Sie die neue Adresse deshalb genau.",
+  "settings.profile.email.hint": "Die neue Adresse gilt sofort für Ihr Konto in allen verbundenen Diensten, auch für E-Mails zu Buchungen und Rechnungen. Wir senden einen Code an die neue Adresse. Die alte Adresse gilt sofort nicht mehr für die Anmeldung und die Wiederherstellung Ihres Kontos, auch bevor Sie die neue bestätigt haben. Wenn Sie sich nur mit einem Code per E-Mail anmelden, sperrt Sie ein Tippfehler aus. Prüfen Sie die neue Adresse deshalb genau.",
   "settings.profile.email.new": "Neue E-Mail-Adresse",
   "settings.profile.email.repeat": "E-Mail-Adresse wiederholen",
   "settings.profile.email.submit": "E-Mail-Adresse ändern",

@@ -288,15 +288,28 @@ describe("settings e-mail change (plan §6.9, S16)", () => {
     }
   });
 
-  it("says what a change does: code to the new address, old address dead at once, typo locks out", () => {
+  it("says what a change does: all connected services, code to the new address, old address dead at once, typo locks out code-only logins", () => {
+    const parts = [
+      // S16 and §6.9 "Wirkung auf die drei Mandanten": every tenant takes the new address at once.
+      "allen verbundenen Diensten",
+      "E-Mails zu Buchungen und Rechnungen",
+      "Code an die neue Adresse",
+      "alte Adresse gilt sofort nicht mehr",
+      "Anmeldung",
+      // Only code-by-e-mail logins are locked out; passkey and social logins do not depend on the address.
+      "nur mit einem Code per E-Mail",
+      "Tippfehler",
+    ];
     for (const [name, catalog] of Object.entries(catalogs)) {
       const hint = catalog[HINT]!;
-      for (const part of ["Code an die neue Adresse", "alte Adresse gilt sofort nicht mehr", "Anmeldung", "ohne Passwort", "Tippfehler"]) {
+      for (const part of parts) {
         assert.ok(hint.includes(part), `${name}:${HINT} lacks „${part}“`);
       }
+      // The locked-out accounts have no password, so the hint must not talk about one.
+      assert.ok(!hint.includes("Passwort"), `${name}:${HINT} mentions a password`);
       assert.ok(catalog[DIALOG_TEXT]!.includes("alte Adresse gilt danach sofort nicht mehr"), `${name}:${DIALOG_TEXT}`);
     }
-    assert.ok(uiDe[HINT]!.includes("Wiederherstellen deines Kontos"), "ui.de: recovery as in recovery.title");
-    assert.ok(uiDeSie[HINT]!.includes("Zurücksetzen des Passworts"), "ui.de-sie: recovery as in recovery.title");
+    assert.ok(uiDe[HINT]!.includes("Wiederherstellung deines Kontos"), "ui.de: recovery of the account");
+    assert.ok(uiDeSie[HINT]!.includes("Wiederherstellung Ihres Kontos"), "ui.de-sie: recovery of the account");
   });
 });
