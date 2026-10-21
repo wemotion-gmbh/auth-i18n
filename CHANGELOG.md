@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1
+
+- New UI keys in `ui.de-sie.json` (Sie form) and `ui.de.json` (Du form), all in `test/renderer-ui-keys.json`:
+  - `forms.error.retry`: text after the one automatic retry on a CSRF violation („Bitte versuchen Sie es noch einmal.“); `@wemotion/kratos-flow` used `forms.error.generic` until now.
+  - `login.webauthn.unavailable`: security-key login is not possible on this device/browser; kratos-flow mapped it to `login.webauthn.failed` until now.
+  - `forms.button.retry` („Erneut versuchen“): retry button next to the network/429 text (plan §3.7, test L11).
+- `forms.error.network` in `ui.de-sie.json` now reads „Verbindungsproblem oder zu viele Versuche – bitte warten Sie einen Moment und versuchen Sie es erneut.“ In the browser a Kratos 429 has no CORS headers, so `fetch` throws a `TypeError` that cannot be told apart from a network failure; the text covers both. The Du text in `ui.de.json` is unchanged (the key is new in 0.2.0; Hub and canou-auth pin older SHAs and do not use it yet).
+
 ## 0.2.0
 
 - New locale `de-sie` (Sie form): `locales/de-sie.json` with all message IDs of `de.json` plus the Kratos v26.2.0 IDs 1010020, 4060003 and 4070004; `locales/ui.de-sie.json` with every UI key.

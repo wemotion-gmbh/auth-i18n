@@ -1,6 +1,6 @@
 {
   "name": "@wemotion/auth-i18n",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Zentraler i18n-Katalog (Deutsch: Du-Form fuer Hub/App, Sie-Form fuer Portale) fuer Ory Kratos UI-Meldungen, gekeyt nach stabiler Message-ID. Einbinden ueberall, wo Kratos-Flows gerendert werden.",
   "type": "module",
   "main": "./src/index.ts",
