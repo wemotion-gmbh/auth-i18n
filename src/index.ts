@@ -141,6 +141,14 @@ export interface LocalizerOptions {
   overrides?: Readonly<Record<string, string>>;
   /** Called once per lookup that falls back to a generic text. */
   onMissing?: (event: MissingTextEvent) => void;
+  /**
+   * Default: true. Replaces `context.property` with the field label (`propertyLabel`, then
+   * `property.<segment>`) and `context.provider` with the display name (`oidc.provider.<id>`)
+   * before interpolation. false interpolates Kratos' context unchanged, like
+   * `localizeUiText`, for consumers that switch over without a visible change. An explicit
+   * `propertyLabel` is still used.
+   */
+  mapContext?: boolean;
 }
 
 export interface MessageOptions {
@@ -195,6 +203,7 @@ export function createLocalizer(opts: LocalizerOptions): Localizer {
   const { locale } = opts;
   const unknown: UnknownMessageMode = opts.unknown ?? "kratos";
   const overrides = opts.overrides ?? {};
+  const mapContext = opts.mapContext ?? true;
   const catalog = catalogs[locale];
   const ui = uiStrings[locale];
 
@@ -219,7 +228,8 @@ export function createLocalizer(opts: LocalizerOptions): Localizer {
 
   const message = (msg: UiText, messageOpts: MessageOptions = {}): LocalizedText => {
     const key = String(msg.id);
-    const template = overrides[key] ?? catalog[key];
+    const override = overrides[key];
+    const template = nonEmpty(override) ? override : catalog[key];
     if (nonEmpty(template)) {
       return { text: interpolate(template, messageContext(msg.context, messageOpts)), known: true };
     }
@@ -230,6 +240,10 @@ export function createLocalizer(opts: LocalizerOptions): Localizer {
 
   const messageContext = (context: Context | undefined, messageOpts: MessageOptions): Context => {
     const out: Context = { ...(context ?? {}) };
+    if (!mapContext) {
+      if (nonEmpty(messageOpts.propertyLabel) && typeof out.property === "string") out.property = messageOpts.propertyLabel;
+      return out;
+    }
     const providerId = typeof out.provider_id === "string" && out.provider_id !== "" ? out.provider_id : out.provider;
     if (typeof providerId === "string" && providerId !== "") out.provider = provider(providerId);
     if (typeof out.property === "string" && out.property !== "") {

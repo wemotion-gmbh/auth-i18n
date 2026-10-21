@@ -115,6 +115,30 @@ describe("createLocalizer - messages", () => {
     assert.equal(l.message({ id: 1050002, text: "", context: { provider: "github" } }).text, "Github verknüpfen");
     assert.equal(l.provider("APPLE"), "Apple");
   });
+
+  it("an empty override for a message ID does not hide the catalog text", () => {
+    const { events, onMissing } = collect();
+    const l = createLocalizer({ locale: "de-sie", overrides: { "4000006": "" }, onMissing });
+    assert.deepEqual(l.message({ id: 4000006, text: "x", type: "error" }), {
+      text: messages["de-sie"]["4000006"],
+      known: true,
+    });
+    assert.deepEqual(events, []);
+  });
+
+  it("mapContext: false interpolates Kratos' context unchanged, like localizeUiText", () => {
+    const l = createLocalizer({ locale: "de", mapContext: false });
+    const property = { id: 4000002, text: "x", context: { property: "email" } };
+    assert.equal(l.message(property).text, localizeUiText(property));
+    assert.match(l.message(property).text, /email/);
+    const provider = { id: 1010002, text: "x", context: { provider: "google" } };
+    assert.equal(l.message(provider).text, localizeUiText(provider));
+    assert.equal(l.message(provider).text, "Mit google anmelden");
+    // An explicit node label is still the caller's choice.
+    assert.match(l.message(property, { propertyLabel: "E-Mail-Adresse" }).text, /E-Mail-Adresse/);
+    // Default stays on: the portal path maps both.
+    assert.equal(createLocalizer({ locale: "de" }).message(provider).text, "Mit Google anmelden");
+  });
 });
 
 describe("createLocalizer - UI keys", () => {

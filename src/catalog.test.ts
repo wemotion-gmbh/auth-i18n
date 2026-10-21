@@ -34,6 +34,10 @@ const DU_IMPERATIVE = word(
     "prüf", "gib", "versuch", "wähl", "mach", "stell", "klick", "melde", "richte", "ändere",
     "bestätige", "bewahre", "schließe", "löse", "starte", "aktualisiere", "lege", "wende",
     "nutze", "füge", "sende", "gehe",
+    // -e forms of the stems above. "prüfe" only before a word, because "Prüfe…" is a
+    // first-person progress label; "versuche" only before "es", because "Versuche" is
+    // also the plural noun ("Zu viele Versuche").
+    "prüfe(?=\\s)", "wähle", "mache", "stelle", "klicke", "versuche(?=\\s+es)",
   ].join("|"),
 );
 const MOIN = word("moin");
@@ -123,6 +127,22 @@ describe("Sie-form checker", () => {
     assert.ok(!DU_IMPERATIVE.test("Bitte wählen Sie eine Methode"));
     assert.ok(!DU_PRONOUN.test("direkt durch"));
     assert.ok(DU_PRONOUN.test("Ändere deine Adresse"));
+  });
+
+  it("self-test: finds Du imperatives ending in -e, but not the noun or a progress label", () => {
+    for (const du of [
+      "Bitte versuche es erneut.",
+      "Bitte prüfe die Schreibweise.",
+      "Wähle eine Methode.",
+      "Mache ein Foto.",
+      "Stelle sicher, dass alles stimmt.",
+      "Klicke auf den Link.",
+    ]) {
+      assert.ok(DU_IMPERATIVE.test(du), `checker misses: ${du}`);
+    }
+    for (const neutral of ["Zu viele Versuche. Bitte warten Sie einen Moment.", "Prüfe…", "Bitte versuchen Sie es erneut."]) {
+      assert.ok(!DU_IMPERATIVE.test(neutral), `false positive: ${neutral}`);
+    }
   });
 
   it("finds no Du form and no 'Moin' in de-sie.json", () => {

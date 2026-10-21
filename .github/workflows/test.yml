@@ -1,0 +1,33 @@
+name: test
+
+# Public repository: GitHub-hosted runner, no secrets, read-only token.
+# The org runners (arc-x64) do not take public repositories.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install dev dependencies
+        run: npm install --no-audit --no-fund --no-package-lock
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Test
+        run: npm test

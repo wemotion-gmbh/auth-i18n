@@ -106,7 +106,8 @@ t.provider("google"); // -> "Google"
 
 - One locale only: `createLocalizer` never falls back to another locale (no `fallbackLocale`), so a Sie portal never shows a Du text.
 - Never empty: an unknown UI key yields `forms.text-unavailable` plus `onMissing({ code: "ui_key_missing" })`.
-- `context.provider` is replaced by `oidc.provider.<id>`; `context.property` (Kratos sends only the last path segment) by the node label or `property.<segment>`.
+- `context.provider` is replaced by `oidc.provider.<id>`; `context.property` (Kratos sends only the last path segment) by the node label or `property.<segment>`. `mapContext: false` turns this off and interpolates Kratos' context unchanged, like `localizeUiText` (for consumers that must not change visibly, e.g. canou-auth).
+- Empty overrides are ignored, for message IDs and UI keys alike.
 - `localizeUiText`, `localizeFlowMessages` and `fallbackLocale` behave as before; existing consumers are unaffected.
 
 ### Tests
