@@ -313,3 +313,72 @@ describe("settings e-mail change (plan §6.9, S16)", () => {
     assert.ok(uiDeSie[HINT]!.includes("Wiederherstellung Ihres Kontos"), "ui.de-sie: recovery of the account");
   });
 });
+
+describe("portal login extras and error page (0.2.3, plan §3.3, §3.9)", () => {
+  // Keys the portal PRs read directly (not via kratos-flow REQUIRED_UI_KEYS): PR7 login
+  // extras and PR8 error page / verification end state.
+  const PR7_KEYS = ["login.oidc.incomplete", "logout.done.message", "logout.error.failed"];
+  // Kratos v26.2.0 error ids (text/message_error.go:21-24) that reach the error UI as a
+  // stored self-service error; kratos-flow looks up `error.page.text.<error.id>`.
+  const ERROR_IDS = ["security_csrf_violation", "security_identity_mismatch", "self_service_flow_return_to_forbidden"];
+  const ERROR_PAGE_KEYS = ["error.page.text-expired", "error.page.text-network", ...ERROR_IDS.map((id) => `error.page.text.${id}`)];
+  const PR8_KEYS = [...ERROR_PAGE_KEYS, "forms.label.back-to-settings"];
+  const NEW_KEYS = [...PR7_KEYS, ...PR8_KEYS];
+  // Same text in both forms, because they do not address the user.
+  const NEUTRAL_KEYS = new Set(["login.oidc.incomplete", "forms.label.back-to-settings"]);
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+
+  it("has every new key in ui.de.json and ui.de-sie.json, non-empty, without placeholders", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      NEW_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map((key) => `${name}:${key}`),
+    );
+    assert.deepEqual(missing, []);
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) assert.deepEqual(placeholders(catalog[key]!), [], `${name}:${key}`);
+    }
+  });
+
+  it("addresses the user in the catalog's form (real translation, not a copy)", () => {
+    for (const key of NEW_KEYS.filter((k) => !NEUTRAL_KEYS.has(k))) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} should use the Sie form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} should use the Du form`);
+      assert.notEqual(uiDe[key], uiDeSie[key], key);
+    }
+    for (const key of NEUTRAL_KEYS) assert.equal(uiDe[key], uiDeSie[key], key);
+  });
+
+  it("keeps the plan and portal wording (plan §3.9, sso-logout.ts LOGOUT_*_MESSAGE)", () => {
+    for (const catalog of Object.values(catalogs)) {
+      assert.equal(catalog["login.oidc.incomplete"], "Die Anmeldung mit Google/Microsoft wurde nicht abgeschlossen.");
+    }
+    assert.equal(uiDeSie["logout.done.message"], "Sie wurden erfolgreich abgemeldet.");
+    assert.equal(
+      uiDeSie["logout.error.failed"],
+      "Die Abmeldung hat nicht geklappt. Sie sind noch angemeldet. Bitte versuchen Sie es noch einmal.",
+    );
+    assert.equal(uiDe["logout.error.failed"], "Die Abmeldung hat nicht geklappt. Du bist noch angemeldet. Bitte versuch es noch einmal.");
+  });
+
+  it("names a real Kratos error id in every error.page.text.<id> key, in the form kratos-flow looks up", () => {
+    const kratosFlowId = /^[a-z0-9_]{1,64}$/;
+    for (const catalog of Object.values(catalogs)) {
+      const ids = Object.keys(catalog)
+        .filter((key) => key.startsWith("error.page.text."))
+        .map((key) => key.slice("error.page.text.".length));
+      assert.deepEqual(ids.sort(), [...ERROR_IDS].sort());
+      for (const id of ids) assert.ok(kratosFlowId.test(id), id);
+    }
+  });
+
+  it("keeps the error page plain: no technical words, always ends with signing in again", () => {
+    const technical = /\b(?:ID|CSRF|Kratos|HTTP|Token|Flow|return_to|Session|Code \d|\d{3,})\b/i;
+    for (const key of ERROR_PAGE_KEYS) {
+      assert.ok(!technical.test(uiDeSie[key]!), `ui.de-sie:${key}`);
+      assert.ok(!technical.test(uiDe[key]!), `ui.de:${key}`);
+      assert.ok(uiDeSie[key]!.endsWith("erneut an."), `ui.de-sie:${key} should end with „… erneut an.“`);
+      assert.ok(uiDe[key]!.endsWith("erneut an."), `ui.de:${key} should end with „… erneut an.“`);
+    }
+    // The generic text the error page falls back to stays as it is.
+    assert.equal(uiDeSie["error.page.text"], "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte melden Sie sich erneut an.");
+  });
+});
