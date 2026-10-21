@@ -246,3 +246,57 @@ describe("UI catalogs", () => {
     }
   });
 });
+
+describe("settings e-mail change (plan §6.9, S16)", () => {
+  // Default hint above the e-mail form plus the confirmation dialog before submit. A
+  // portal slot may override the hint; the catalog text is the default.
+  const HINT = "settings.profile.email.hint";
+  const DIALOG_TEXT = "settings.profile.email.dialog.text";
+  const EMAIL_CHANGE_KEYS = [
+    HINT,
+    "settings.profile.email.dialog.title",
+    DIALOG_TEXT,
+    "settings.profile.email.dialog.confirm",
+    "settings.profile.email.dialog.cancel",
+  ];
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+
+  it("has every key in ui.de.json and ui.de-sie.json, non-empty, and in the renderer key list", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      EMAIL_CHANGE_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map(
+        (key) => `${name}:${key}`,
+      ),
+    );
+    assert.deepEqual(missing, []);
+    assert.deepEqual(EMAIL_CHANGE_KEYS.filter((key) => !rendererKeys.includes(key)), []);
+  });
+
+  it("puts the new address as {email} into the dialog text of both forms, and nowhere else", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.deepEqual(placeholders(catalog[DIALOG_TEXT]!), ["email"], `${name}:${DIALOG_TEXT}`);
+      for (const key of EMAIL_CHANGE_KEYS.filter((k) => k !== DIALOG_TEXT)) {
+        assert.deepEqual(placeholders(catalog[key]!), [], `${name}:${key}`);
+      }
+    }
+  });
+
+  it("addresses the user in the catalog's form (real translation, not a copy)", () => {
+    for (const key of [HINT, DIALOG_TEXT]) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} should use the Sie form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} should use the Du form`);
+      assert.notEqual(uiDe[key], uiDeSie[key], key);
+    }
+  });
+
+  it("says what a change does: code to the new address, old address dead at once, typo locks out", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const hint = catalog[HINT]!;
+      for (const part of ["Code an die neue Adresse", "alte Adresse gilt sofort nicht mehr", "Anmeldung", "ohne Passwort", "Tippfehler"]) {
+        assert.ok(hint.includes(part), `${name}:${HINT} lacks „${part}“`);
+      }
+      assert.ok(catalog[DIALOG_TEXT]!.includes("alte Adresse gilt danach sofort nicht mehr"), `${name}:${DIALOG_TEXT}`);
+    }
+    assert.ok(uiDe[HINT]!.includes("Wiederherstellen deines Kontos"), "ui.de: recovery as in recovery.title");
+    assert.ok(uiDeSie[HINT]!.includes("Zurücksetzen des Passworts"), "ui.de-sie: recovery as in recovery.title");
+  });
+});

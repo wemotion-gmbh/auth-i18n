@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.2
+
+- New UI keys for the e-mail change in settings (plan §6.9, S16, decision of 21.10.: confirmation dialog before submit) in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form), all in `test/renderer-ui-keys.json`:
+  - `settings.profile.email.hint`: default hint at the e-mail form. A code goes to the new address; the old address stops working at once for login and recovery, even before the new one is confirmed; password-less accounts are locked out by a typo, so check carefully. A portal slot only overrides it.
+  - `settings.profile.email.dialog.title` („Stimmt die neue E-Mail-Adresse?“), `settings.profile.email.dialog.text` (new address as `{email}`, like `settings.profile.email.confirm`), `settings.profile.email.dialog.confirm` („Ja, Adresse ändern“), `settings.profile.email.dialog.cancel` („Nein, korrigieren“): confirmation dialog before the settings submit.
+- Tests: the five keys exist non-empty in both catalogs and in the renderer key list, `{email}` is in the dialog text of both forms and no other placeholder in the five keys, hint and dialog text use the catalog's form (Du/Sie), and the hint names code, old address, login, password-less and typo.
+- No consumer changes visibly: `@wemotion/kratos-flow` reads the keys only after its follow-up PR; Hub and canou-auth pin older SHAs.
+
 ## 0.2.1
 
 - New UI keys in `ui.de-sie.json` (Sie form) and `ui.de.json` (Du form), all in `test/renderer-ui-keys.json`:
