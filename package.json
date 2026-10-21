@@ -1,7 +1,7 @@
 {
   "name": "@wemotion/auth-i18n",
-  "version": "0.1.0",
-  "description": "Zentraler i18n-Katalog (Deutsch, du/Moin) fuer Ory Kratos UI-Meldungen, gekeyt nach stabiler Message-ID. Einbinden ueberall, wo Kratos-Flows gerendert werden.",
+  "version": "0.2.0",
+  "description": "Zentraler i18n-Katalog (Deutsch: Du-Form fuer Hub/App, Sie-Form fuer Portale) fuer Ory Kratos UI-Meldungen, gekeyt nach stabiler Message-ID. Einbinden ueberall, wo Kratos-Flows gerendert werden.",
   "type": "module",
   "main": "./src/index.ts",
   "module": "./src/index.ts",
@@ -9,8 +9,10 @@
   "exports": {
     ".": "./src/index.ts",
     "./locales/de.json": "./locales/de.json",
+    "./locales/de-sie.json": "./locales/de-sie.json",
     "./locales/en.json": "./locales/en.json",
     "./ui/de.json": "./locales/ui.de.json",
+    "./ui/de-sie.json": "./locales/ui.de-sie.json",
     "./app-copy/de.json": "./locales/app-copy.de.json"
   },
   "files": [
@@ -22,7 +24,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts --clean",
     "typecheck": "tsc --noEmit",
-    "test": "node --experimental-strip-types --test src/*.test.ts"
+    "test": "node --experimental-strip-types --import ./test/register.mjs --test src/*.test.ts"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
