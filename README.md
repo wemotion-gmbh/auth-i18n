@@ -77,6 +77,49 @@ i18n.addResourceBundle("de", "auth-ui", uiStrings.de);
 i18n.addResourceBundle("de", "auth-app", appCopy.de);
 ```
 
+## Sie-Form and `createLocalizer` (0.2.0)
+
+Portals address users formally. `0.2.0` adds a second German locale next to the Du form:
+
+| Path | Content |
+|---|---|
+| `locales/de-sie.json` | Every Kratos message ID of `de.json` plus all IDs of Kratos v26.2.0 (`test/kratos-ids-v26.2.0.json`), in Sie form |
+| `locales/ui.de-sie.json` | Every UI key of `ui.de.json` in Sie form, including the keys the Kratos UI-node renderer needs |
+
+`ui.de.json` got the same new keys in Du form, so `uiStrings.de` and `uiStrings["de-sie"]` have identical keys.
+
+```ts
+import { createLocalizer } from "@wemotion/auth-i18n";
+
+const t = createLocalizer({
+  locale: "de-sie",            // "de" | "de-sie"
+  unknown: "generic",          // unknown message ID: generic text per type ("kratos": Kratos' own text)
+  overrides: { "login.step.identifier.title": "Willkommen bei Leinerstift" },
+  onMissing: (e) => console.warn(e.code, e.id ?? e.key), // IDs/keys only, never texts
+});
+
+t.message({ id: 4000002, text: "", type: "error", context: { property: "first" } }, { propertyLabel: "Vorname" });
+// -> { text: "Bitte füllen Sie das Feld „Vorname“ aus.", known: true }
+t.ui("login.step.code.subtitle", { email: "user@example.org" });
+t.provider("google"); // -> "Google"
+```
+
+- One locale only: `createLocalizer` never falls back to another locale (no `fallbackLocale`), so a Sie portal never shows a Du text.
+- Never empty: an unknown UI key yields `forms.text-unavailable` plus `onMissing({ code: "ui_key_missing" })`.
+- `context.provider` is replaced by `oidc.provider.<id>`; `context.property` (Kratos sends only the last path segment) by the node label or `property.<segment>`. `mapContext: false` turns this off and interpolates Kratos' context unchanged, like `localizeUiText` (for consumers that must not change visibly, e.g. canou-auth).
+- Empty overrides are ignored, for message IDs and UI keys alike.
+- `localizeUiText`, `localizeFlowMessages` and `fallbackLocale` behave as before; existing consumers are unaffected.
+
+### Tests
+
+`npm test` (Node >= 22.15, no install needed) checks: parity `de.json` -> `de-sie.json`, coverage of the Kratos ID list, placeholders, Sie form (no Du pronouns/imperatives, no "Moin"; the checker has a self-test against `de.json`), real umlauts, identical keys in both UI catalogs and the renderer key list (`test/renderer-ui-keys.json`), and the localizer. `test/register.mjs` only lets Node load the bundler-style source (extensionless imports, JSON without import attributes).
+
+Regenerate the Kratos ID list for a new Kratos version:
+
+```sh
+node scripts/kratos-ids.mjs path/to/kratos/text/id.go v26.2.0 > test/kratos-ids-v26.2.0.json
+```
+
 ## E-Mail-Templates in Kratos deployen
 
 Die `.gotmpl`-Dateien sind die Quelle der Wahrheit für die courier-Templates. In der

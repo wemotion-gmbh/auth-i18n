@@ -13,13 +13,16 @@
  */
 
 import deMessages from "../locales/de.json";
+import deSieMessages from "../locales/de-sie.json";
 import enMessages from "../locales/en.json";
 import uiDe from "../locales/ui.de.json";
+import uiDeSie from "../locales/ui.de-sie.json";
 import appCopyDe from "../locales/app-copy.de.json";
 import { interpolate, type Context } from "./interpolate";
 
 export type UiTextType = "info" | "error" | "success";
-export type Locale = "de" | "en";
+/** "de" = Du-Form (Hub, canou-app), "de-sie" = Sie-Form (Portale), "en" = Kratos-Referenz. */
+export type Locale = "de" | "de-sie" | "en";
 
 /** Eine Kratos-UI-Meldung, wie sie in flow.ui.messages[] / node.messages[] / node.meta.label steht. */
 export interface UiText {
@@ -31,6 +34,7 @@ export interface UiText {
 
 const catalogs: Record<Locale, Record<string, string>> = {
   de: deMessages as Record<string, string>,
+  "de-sie": deSieMessages as Record<string, string>,
   en: enMessages as Record<string, string>,
 };
 
@@ -95,6 +99,167 @@ export type { Context } from "./interpolate";
 /** Rohe Kataloge — fuer direktes Verdrahten in ein i18n-Framework (i18next-Resource o.ae.). */
 export const messages = catalogs;
 /** Nicht-numerische UI-Strings (Seitentitel, Buttons aus @ory/elements: login.title, consent.* ...). */
-export const uiStrings = { de: uiDe as Record<string, string> };
+export const uiStrings: Record<UiLocale, Record<string, string>> = {
+  de: uiDe as Record<string, string>,
+  "de-sie": uiDeSie as Record<string, string>,
+};
 /** App-seitige Copy (Validierung, OAuth-Callback-Fehler, Headings) — dot-gekeyt, NICHT von Kratos. */
 export const appCopy = { de: appCopyDe as Record<string, string> };
+
+// ---------------------------------------------------------------------------
+// createLocalizer: the single translator for Kratos messages and UI keys.
+// ---------------------------------------------------------------------------
+
+/** Locales with a complete UI catalog (`uiStrings`). "en" joins once it is complete. */
+export type UiLocale = "de" | "de-sie";
+
+/**
+ * What to show for a message ID the catalog does not know:
+ *  - "kratos":  Kratos' own (English) `text`, like `localizeUiText` does today.
+ *  - "generic": a generic text per message type from the UI catalog, never English.
+ */
+export type UnknownMessageMode = "kratos" | "generic";
+
+export interface MissingTextEvent {
+  /** `message_id_missing`: Kratos message ID not in the catalog; `ui_key_missing`: UI key not in the catalog. */
+  code: "message_id_missing" | "ui_key_missing";
+  locale: UiLocale;
+  /** Set for `message_id_missing`. Only the ID, never the message text or context (may hold user data). */
+  id?: number;
+  /** Set for `ui_key_missing`. */
+  key?: string;
+}
+
+export interface LocalizerOptions {
+  locale: UiLocale;
+  /** Default: "kratos". */
+  unknown?: UnknownMessageMode;
+  /**
+   * Portal-specific texts, keyed like the catalogs: numeric message IDs ("4000006") or
+   * UI keys ("login.step.identifier.title"). They win over the catalogs.
+   */
+  overrides?: Readonly<Record<string, string>>;
+  /** Called once per lookup that falls back to a generic text. */
+  onMissing?: (event: MissingTextEvent) => void;
+  /**
+   * Default: true. Replaces `context.property` with the field label (`propertyLabel`, then
+   * `property.<segment>`) and `context.provider` with the display name (`oidc.provider.<id>`)
+   * before interpolation. false interpolates Kratos' context unchanged, like
+   * `localizeUiText`, for consumers that switch over without a visible change. An explicit
+   * `propertyLabel` is still used.
+   */
+  mapContext?: boolean;
+}
+
+export interface MessageOptions {
+  /**
+   * Translated label of the node that carries the message. Kratos puts only the last
+   * path segment into `context.property` ("first", "email"); the node label reads better.
+   * Without it, `property.<segment>` from the UI catalog is used, then the raw segment.
+   */
+  propertyLabel?: string;
+}
+
+export interface LocalizedText {
+  text: string;
+  /** false when the ID is not in the catalog (and no override exists). */
+  known: boolean;
+}
+
+export interface Localizer {
+  readonly locale: UiLocale;
+  /** Translates a Kratos message (flow/node message or node label). Never returns an empty text. */
+  message(msg: UiText, opts?: MessageOptions): LocalizedText;
+  /** Looks up a UI key and interpolates `{name}` placeholders. Never returns an empty text. */
+  ui(key: string, values?: Context): string;
+  /** True when the UI key exists (override or catalog). */
+  hasUi(key: string): boolean;
+  /** Display name of an OIDC provider id ("google" -> "Google"). */
+  provider(id: string): string;
+}
+
+const GENERIC_BY_TYPE: Record<UiTextType, string> = {
+  error: "forms.error.generic",
+  info: "forms.info.generic",
+  success: "forms.success.generic",
+};
+const TEXT_UNAVAILABLE = "forms.text-unavailable";
+
+function nonEmpty(value: string | undefined): value is string {
+  return typeof value === "string" && value !== "";
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
+ * Creates the translator for one locale. Lookup order for messages: overrides -> catalog
+ * of `locale` -> unknown mode. For UI keys: overrides -> `uiStrings[locale]` -> generic
+ * text. It never falls back to another locale (no `fallbackLocale`), so a Sie portal never
+ * shows a Du text and vice versa.
+ */
+export function createLocalizer(opts: LocalizerOptions): Localizer {
+  const { locale } = opts;
+  const unknown: UnknownMessageMode = opts.unknown ?? "kratos";
+  const overrides = opts.overrides ?? {};
+  const mapContext = opts.mapContext ?? true;
+  const catalog = catalogs[locale];
+  const ui = uiStrings[locale];
+
+  const lookupUi = (key: string): string | undefined => {
+    const override = overrides[key];
+    if (nonEmpty(override)) return override;
+    const value = ui[key];
+    return nonEmpty(value) ? value : undefined;
+  };
+
+  const uiText = (key: string, values?: Context): string => {
+    const template = lookupUi(key);
+    if (template !== undefined) return interpolate(template, values ?? {});
+    opts.onMissing?.({ code: "ui_key_missing", locale, key });
+    return lookupUi(TEXT_UNAVAILABLE) ?? key;
+  };
+
+  const provider = (id: string): string => {
+    const key = `oidc.provider.${id.toLowerCase()}`;
+    return lookupUi(key) ?? capitalize(id);
+  };
+
+  const message = (msg: UiText, messageOpts: MessageOptions = {}): LocalizedText => {
+    const key = String(msg.id);
+    const override = overrides[key];
+    const template = nonEmpty(override) ? override : catalog[key];
+    if (nonEmpty(template)) {
+      return { text: interpolate(template, messageContext(msg.context, messageOpts)), known: true };
+    }
+    opts.onMissing?.({ code: "message_id_missing", locale, id: msg.id });
+    if (unknown === "kratos" && nonEmpty(msg.text)) return { text: msg.text, known: false };
+    return { text: uiText(GENERIC_BY_TYPE[msg.type ?? "info"] ?? GENERIC_BY_TYPE.info), known: false };
+  };
+
+  const messageContext = (context: Context | undefined, messageOpts: MessageOptions): Context => {
+    const out: Context = { ...(context ?? {}) };
+    if (!mapContext) {
+      if (nonEmpty(messageOpts.propertyLabel) && typeof out.property === "string") out.property = messageOpts.propertyLabel;
+      return out;
+    }
+    const providerId = typeof out.provider_id === "string" && out.provider_id !== "" ? out.provider_id : out.provider;
+    if (typeof providerId === "string" && providerId !== "") out.provider = provider(providerId);
+    if (typeof out.property === "string" && out.property !== "") {
+      const segment = out.property.split(".").pop() ?? out.property;
+      out.property = nonEmpty(messageOpts.propertyLabel)
+        ? messageOpts.propertyLabel
+        : (lookupUi(`property.${segment}`) ?? segment);
+    }
+    return out;
+  };
+
+  return {
+    locale,
+    message,
+    ui: uiText,
+    hasUi: (key: string) => lookupUi(key) !== undefined,
+    provider,
+  };
+}
