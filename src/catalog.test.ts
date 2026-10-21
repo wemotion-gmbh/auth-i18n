@@ -48,6 +48,18 @@ function duFormHits(catalog: Record<string, string>): string[] {
     .map(([key]) => key);
 }
 
+// --- Du-form checker (reverse) ---------------------------------------------------------
+// Case-sensitive: lowercase "sie" (she/they) is fine in a Du text, the capitalised polite
+// pronoun is not. Measured on de.json and ui.de.json at 0.2.1: no hit, so any hit is a
+// Sie text copied into a Du catalog.
+const SIE_FORM = /(?<!\p{L})(?:Sie|Ihr\p{L}*|Ihnen)(?!\p{L})/u;
+
+function sieFormHits(catalog: Record<string, string>): string[] {
+  return Object.entries(catalog)
+    .filter(([, text]) => SIE_FORM.test(text))
+    .map(([key]) => key);
+}
+
 // --- Umlaut checker --------------------------------------------------------------------
 // Typical ae/oe/ue/ss substitutes in German UI text. A word list, because "neue",
 // "aktuell" or "Quelle" contain "ue" legitimately.
@@ -154,6 +166,31 @@ describe("Sie-form checker", () => {
   });
 });
 
+describe("Du-form checker", () => {
+  it("self-test: finds the Sie form, but not lowercase 'sie' or words starting with 'Sie'", () => {
+    for (const sie of ["Bitte melden Sie sich an.", "Ihre Adresse ist bestätigt.", "Wir senden Ihnen einen Code."]) {
+      assert.ok(SIE_FORM.test(sie), `checker misses: ${sie}`);
+    }
+    for (const du of ["Bitte melde dich an.", "Wir haben sie gelöscht.", "Sieben Tage gültig."]) {
+      assert.ok(!SIE_FORM.test(du), `false positive: ${du}`);
+    }
+  });
+
+  it("self-test: finds every Sie text of ui.de-sie.json that addresses the user", () => {
+    for (const key of ["forms.error.retry", "login.webauthn.unavailable", "forms.error.network"]) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `checker misses ui.de-sie:${key}`);
+    }
+  });
+
+  it("finds no Sie form in de.json", () => {
+    assert.deepEqual(sieFormHits(de), []);
+  });
+
+  it("finds no Sie form in ui.de.json", () => {
+    assert.deepEqual(sieFormHits(uiDe), []);
+  });
+});
+
 describe("umlauts", () => {
   it("self-test: detects substitutes but not legitimate 'ue'", () => {
     assert.ok(UMLAUT_SUBSTITUTES.test("Bitte gib eine gueltige Adresse ein"));
@@ -187,6 +224,19 @@ describe("UI catalogs", () => {
   it("uses the same placeholders in both forms", () => {
     const diff = Object.keys(uiDe).filter((k) => placeholders(uiDe[k]!).join(",") !== placeholders(uiDeSie[k]!).join(","));
     assert.deepEqual(diff, []);
+  });
+
+  it("keeps the plan wording for the network/429 and CSRF retry texts (plan §3.6, §3.7, L11)", () => {
+    // One text for network failures and a CORS-less 429: the browser cannot tell them apart.
+    assert.equal(
+      uiDeSie["forms.error.network"],
+      "Verbindungsproblem oder zu viele Versuche – bitte warten Sie einen Moment und versuchen Sie es erneut.",
+    );
+    assert.equal(uiDe["forms.error.network"], "Verbindungsproblem oder zu viele Versuche – bitte warte einen Moment und versuch es erneut.");
+    assert.equal(uiDeSie["forms.error.retry"], "Bitte versuchen Sie es noch einmal.");
+    assert.equal(uiDe["forms.error.retry"], "Bitte versuch es noch einmal.");
+    assert.equal(uiDeSie["forms.button.retry"], "Erneut versuchen");
+    assert.equal(uiDe["forms.button.retry"], "Erneut versuchen");
   });
 
   it("has a display name for Google, Microsoft and Apple", () => {

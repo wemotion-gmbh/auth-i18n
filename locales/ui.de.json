@@ -45,7 +45,7 @@
   "forms.button.sending": "Wird gesendet…",
   "forms.error.code-invalid": "Der Code ist falsch oder abgelaufen.",
   "forms.error.generic": "Das hat nicht geklappt. Bitte prüf deine Eingabe und versuch es erneut.",
-  "forms.error.network": "Verbindungsproblem – bitte prüf deine Internetverbindung und versuch es erneut.",
+  "forms.error.network": "Verbindungsproblem oder zu viele Versuche – bitte warte einen Moment und versuch es erneut.",
   "forms.error.rate-limit": "Zu viele Versuche. Bitte warte einen Moment und versuch es dann erneut.",
   "forms.error.retry": "Bitte versuch es noch einmal.",
   "forms.error.session-expired": "Sitzung abgelaufen. Bitte fordere einen neuen Code an.",
