@@ -109,6 +109,7 @@ t.provider("google"); // -> "Google"
 - `context.provider` is replaced by `oidc.provider.<id>`; `context.property` (Kratos sends only the last path segment) by the node label or `property.<segment>`. `mapContext: false` turns this off and interpolates Kratos' context unchanged, like `localizeUiText` (for consumers that must not change visibly, e.g. canou-auth).
 - Empty overrides are ignored, for message IDs and UI keys alike.
 - `localizeUiText`, `localizeFlowMessages` and `fallbackLocale` behave as before; existing consumers are unaffected.
+- Error page (0.2.3): `error.page.text.<error.id>` holds the text for a Kratos error id (e.g. `security_csrf_violation`), `error.page.text-expired` and `error.page.text-network` cover an unknown/expired error id and a network failure, `error.page.text` is the generic fallback. No text names the error id or Kratos' own message.
 
 ### Tests
 

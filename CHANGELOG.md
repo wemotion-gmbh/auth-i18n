@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.3
+
+- New UI keys for the portal login extras (W1-voll PR7, plan §3.9) in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form):
+  - `login.oidc.incomplete` („Die Anmeldung mit Google/Microsoft wurde nicht abgeschlossen.“, plan wording, same in both forms): `?sso_return=1` without a session. The portal used `login.error.complete-failed` until now. A portal with other providers overrides it.
+  - `logout.done.message` and `logout.error.failed`: the texts of „Mit anderem Konto anmelden“ / sign out this device. The Sie form is word for word the portal's `LOGOUT_SUCCESS_MESSAGE` and `LOGOUT_FAILED_MESSAGE` (`src/auth/sso-logout.ts`).
+- New UI keys for the error page and the verification end state (W1-voll PR8, plan §3.3, §3.9), plain German without technical terms and without the error id, each ending with signing in again („Neu anmelden“ stays `error.page.restart`):
+  - `error.page.text-expired`: Kratos no longer knows the error id of the page (unknown or expired; `GET /self-service/errors?id=` finds no record).
+  - `error.page.text-network`: the error could not be loaded (network failure).
+  - `error.page.text.<error.id>` for the Kratos v26.2.0 error ids that reach the error UI as a stored self-service error (`text/message_error.go:21-24`): `security_csrf_violation`, `security_identity_mismatch`, `self_service_flow_return_to_forbidden`. kratos-flow 0.3.0 `KratosErrorView` already reads `error.page.text.<error.id>` when present; every other id keeps the generic `error.page.text`.
+  - `forms.label.back-to-settings` („Zurück zu den Einstellungen“): verification done after an e-mail change goes back to the settings.
+- Not added, because the keys exist: session notice (`login.session.*`), link step after 1010016 (`account-linking.title`, `login.step.link.hint`, message 1010016), refresh login (`login.title-refresh`, `settings.refresh-required`), aal2, passkey and security key (`login.second-factor.*`, `login.passkey.*`, `login.webauthn.*`), recovery/verification end states (`recovery.step.done.*`, `verification.step.done.*`, `forms.label.to-login`, `forms.button.continue`).
+- Tests: every new key exists non-empty in both catalogs without placeholders, uses the catalog's form (Du/Sie) unless it does not address the user, the plan and portal wording is pinned, every `error.page.text.<id>` names one of the listed Kratos error ids in the form kratos-flow looks up, and the error page texts contain no technical terms.
+- The keys are not in `test/renderer-ui-keys.json`, because kratos-flow does not require them; the portal reads them directly. No consumer changes visibly: Hub and canou-auth pin older SHAs, the portal pins v0.2.2.
+
 ## 0.2.2
 
 - New UI keys for the e-mail change in settings (plan §6.9, S16, decision of 21.10.: confirmation dialog before submit) in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form), all in `test/renderer-ui-keys.json`:
