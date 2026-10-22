@@ -359,6 +359,13 @@ describe("portal login extras and error page (0.2.3, plan §3.3, §3.9)", () => 
     assert.equal(uiDe["logout.error.failed"], "Die Abmeldung hat nicht geklappt. Du bist noch angemeldet. Bitte versuch es noch einmal.");
   });
 
+  it("covers rate limiting in the network text (a 429 without CORS headers arrives as a network error)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.match(catalog["error.page.text-network"]!, /zu viele Versuche/, `${name}:error.page.text-network`);
+      assert.doesNotMatch(catalog["error.page.text.security_csrf_violation"]!, /wenn sie /, `${name}: "sie" reads like "Sie"`);
+    }
+  });
+
   it("names a real Kratos error id in every error.page.text.<id> key, in the form kratos-flow looks up", () => {
     const kratosFlowId = /^[a-z0-9_]{1,64}$/;
     for (const catalog of Object.values(catalogs)) {
