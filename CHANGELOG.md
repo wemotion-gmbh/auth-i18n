@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.4
+
+- Texts after the Beta matrix D1 of W1-voll (22.10.), in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form):
+  - `login.passkey.cancelled` now also names the second cause (L4b, decision of 22.10.): „Die Anmeldung mit Passkey wurde abgebrochen oder auf diesem Gerät ist kein Passkey gespeichert.“, same in both forms. A device without a passkey ends in the same WebAuthn `NotAllowedError` as a cancel, so the renderer cannot tell them apart.
+  - New key `registration.error.existing-account` (R1): Kratos reports an e-mail address that already has an account (4000007) only after the code step, and the generic catalog text names phone number and username and offers no way out. The registration shows „Für diese E-Mail-Adresse gibt es bereits ein Konto. Melden Sie sich an oder setzen Sie Ihr Passwort zurück, falls Sie es vergessen haben.“ (`ui.de-sie.json`) / „… Melde dich an oder setze dein Passwort zurück, falls du es vergessen hast.“ (`ui.de.json`) instead. The message 4000007 itself stays generic, because settings (e-mail change) and other identifiers use it too.
+- Not added, because the keys exist: the link labels for R1 are `registration.login-button` („Anmelden“) and `forms.label.forgot-password` („Passwort vergessen?“); the retry button after a failed submit (L11) is `forms.button.retry` („Erneut versuchen“, since 0.2.1).
+- Tests: the L4b wording is pinned in both forms, `forms.button.retry` stays the L11 text and in the renderer key list, the R1 text exists in both forms without placeholders and in the catalog's form (Du/Sie), names the e-mail address, signing in and the password reset, does not list phone number, username or „Kennung“, the reused link labels are pinned, and no duplicate `registration.existing-account*` key exists.
+- `registration.error.existing-account` is not in `test/renderer-ui-keys.json`, because kratos-flow does not require it yet; the list follows when kratos-flow adds it to `REQUIRED_UI_KEYS`. No consumer changes visibly: Hub and canou-auth pin older SHAs, the portal pins v0.2.3 and gets the longer passkey text with its next bump.
+
 ## 0.2.3
 
 - New UI keys for the portal login extras (W1-voll PR7, plan §3.9) in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form):

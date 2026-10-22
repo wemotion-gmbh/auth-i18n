@@ -389,3 +389,52 @@ describe("portal login extras and error page (0.2.3, plan §3.3, §3.9)", () => 
     assert.equal(uiDeSie["error.page.text"], "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte melden Sie sich erneut an.");
   });
 });
+
+describe("matrix D1 texts (0.2.4, L4b, L11, R1)", () => {
+  // R1: Kratos sends 4000007 only after the code step; its generic text names phone number
+  // and username and offers no way out. The registration shows this key instead, next to
+  // the existing link labels below (no duplicates).
+  const EXISTING = "registration.error.existing-account";
+  const LINK_KEYS = { "registration.login-button": "Anmelden", "forms.label.forgot-password": "Passwort vergessen?" };
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+
+  it("names both cases in the passkey cancel text, same in both forms (L4b, decision of 22.10.)", () => {
+    // A device without a passkey ends in the same NotAllowedError as a cancel.
+    for (const catalog of Object.values(catalogs)) {
+      assert.equal(
+        catalog["login.passkey.cancelled"],
+        "Die Anmeldung mit Passkey wurde abgebrochen oder auf diesem Gerät ist kein Passkey gespeichert.",
+      );
+    }
+  });
+
+  it("reuses the retry button text for a failed submit (L11)", () => {
+    for (const catalog of Object.values(catalogs)) assert.equal(catalog["forms.button.retry"], "Erneut versuchen");
+    assert.ok(rendererKeys.includes("forms.button.retry"));
+  });
+
+  it("has the existing-account text in both forms, non-empty, without placeholders (R1)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.ok(typeof catalog[EXISTING] === "string" && catalog[EXISTING]!.trim() !== "", `${name}:${EXISTING}`);
+      assert.deepEqual(placeholders(catalog[EXISTING]!), [], `${name}:${EXISTING}`);
+    }
+    assert.ok(SIE_FORM.test(uiDeSie[EXISTING]!), `ui.de-sie:${EXISTING} should use the Sie form`);
+    assert.ok(DU_PRONOUN.test(uiDe[EXISTING]!) || DU_IMPERATIVE.test(uiDe[EXISTING]!), `ui.de:${EXISTING} should use the Du form`);
+    assert.notEqual(uiDe[EXISTING], uiDeSie[EXISTING]);
+  });
+
+  it("says the e-mail address has an account and points to both links, without the generic identifier list (R1)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const text = catalog[EXISTING]!;
+      assert.ok(text.startsWith("Für diese E-Mail-Adresse gibt es bereits ein Konto."), `${name}:${EXISTING}`);
+      assert.match(text, /sich an|dich an/, `${name}:${EXISTING} should point to signing in`);
+      assert.match(text, /Passwort zurück/, `${name}:${EXISTING} should point to the password reset`);
+      assert.doesNotMatch(text, /Telefon|Benutzername|Kennung/, `${name}:${EXISTING}`);
+      for (const [key, label] of Object.entries(LINK_KEYS)) assert.equal(catalog[key], label, `${name}:${key}`);
+    }
+    // Reused, not duplicated: no second key for the same link labels.
+    for (const catalog of Object.values(catalogs)) {
+      assert.deepEqual(Object.keys(catalog).filter((key) => key.startsWith("registration.existing-account")), []);
+    }
+  });
+});
