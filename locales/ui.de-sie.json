@@ -165,7 +165,7 @@
   "registration.button.request-code": "Code per E-Mail",
   "registration.button.submit": "Konto erstellen",
   "registration.error.existing-account": "Für diese E-Mail-Adresse gibt es bereits ein Konto. Melden Sie sich an oder setzen Sie Ihr Passwort zurück, falls Sie es vergessen haben.",
-  "registration.error.failed":"Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "registration.error.failed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
   "registration.error.request-failed": "Code konnte nicht angefordert werden. Existiert vielleicht schon ein Konto mit dieser E-Mail?",
   "registration.login-button": "Anmelden",
   "registration.login-label": "Schon ein Konto?",

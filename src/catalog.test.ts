@@ -437,4 +437,20 @@ describe("matrix D1 texts (0.2.4, L4b, L11, R1)", () => {
       assert.deepEqual(Object.keys(catalog).filter((key) => key.startsWith("registration.existing-account")), []);
     }
   });
+
+  it("keeps the create-ceremony texts free of sign-in wording, so a registration can reuse them", () => {
+    // The L4b text names a device without a stored passkey, which is wrong while a passkey is
+    // being created. A registration create ceremony belongs on settings.<method>.<reason>.
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const method of ["passkey", "webauthn"]) {
+        for (const reason of ["cancelled", "exists", "failed", "unavailable"]) {
+          const key = `settings.${method}.${reason}`;
+          assert.ok(typeof catalog[key] === "string" && catalog[key]!.trim() !== "", `${name}:${key}`);
+          assert.doesNotMatch(catalog[key]!, /Anmeldung|anmelden|gespeichert|hinterlegt/, `${name}:${key}`);
+          assert.ok(rendererKeys.includes(key), key);
+        }
+      }
+      assert.match(catalog["login.passkey.cancelled"]!, /^Die Anmeldung/, `${name}: the L4b text is sign-in only`);
+    }
+  });
 });
