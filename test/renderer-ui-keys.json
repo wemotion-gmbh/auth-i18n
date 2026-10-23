@@ -1,5 +1,5 @@
 {
-  "_comment": "UI keys the Kratos UI-node renderer (@wemotion/kratos-flow) needs from auth-i18n. Mirrors kratos-flow REQUIRED_UI_KEYS; the binding coupling test runs in kratos-flow and in each consumer against the pinned auth-i18n SHA.",
+  "_comment": "UI keys the Kratos UI-node renderer (@wemotion/kratos-flow) needs from auth-i18n. Union of REQUIRED_UI_KEYS of the kratos-flow versions in use (0.3.0 still needs error.page.id-label, 0.3.1 adds the error page texts); the binding coupling test runs in kratos-flow and in each consumer against the pinned auth-i18n SHA.",
   "keys": [
     "account-linking.title",
     "card.footer.select-another-method",
@@ -7,6 +7,8 @@
     "error.page.id-label",
     "error.page.restart",
     "error.page.text",
+    "error.page.text-expired",
+    "error.page.text-network",
     "error.page.title",
     "forms.button.back",
     "forms.button.busy",

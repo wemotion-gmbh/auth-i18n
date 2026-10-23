@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- `test/renderer-ui-keys.json` lists `error.page.text-expired` and `error.page.text-network`, which kratos-flow 0.3.1 requires (`REQUIRED_UI_KEYS`). `error.page.id-label` stays listed, because consumers on kratos-flow 0.3.0 (canou-auth) still require it. Test data only; the catalogs do not change.
+
 ## 0.2.4
 
 - Texts after the Beta matrix D1 of W1-voll (22.10.), in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form):
