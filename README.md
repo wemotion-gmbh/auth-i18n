@@ -110,6 +110,7 @@ t.provider("google"); // -> "Google"
 - Empty overrides are ignored, for message IDs and UI keys alike.
 - `localizeUiText`, `localizeFlowMessages` and `fallbackLocale` behave as before; existing consumers are unaffected.
 - Error page (0.2.3): `error.page.text.<error.id>` holds the text for a Kratos error id (e.g. `security_csrf_violation`), `error.page.text-expired` and `error.page.text-network` cover an unknown/expired error id and a network failure, `error.page.text` is the generic fallback. No text names the error id or Kratos' own message.
+- Registration (0.2.4): `registration.error.existing-account` replaces the generic message 4000007 when a registration ends on an e-mail address that already has an account; the links next to it use `registration.login-button` and `forms.label.forgot-password`. Message 4000007 stays generic for settings and other identifiers.
 
 ### Tests
 

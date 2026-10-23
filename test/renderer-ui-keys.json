@@ -115,6 +115,7 @@
     "recovery.title",
     "registration.button.request-code",
     "registration.button.submit",
+    "registration.error.existing-account",
     "registration.error.failed",
     "registration.error.request-failed",
     "registration.login-button",
