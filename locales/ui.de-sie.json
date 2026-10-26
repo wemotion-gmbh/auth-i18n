@@ -176,6 +176,8 @@
   "registration.subtitle": "Registrieren Sie sich mit {parts}.",
   "registration.title": "Konto erstellen",
   "settings.aal2-required": "Bitte bestätigen Sie die Anmeldung mit Ihrem zweiten Faktor.",
+  "settings.credential.remove-unnamed": "{name} vom {date} entfernen",
+  "settings.credential.remove-unnamed-undated": "{name} entfernen",
   "settings.link": "Anmeldung und Sicherheit",
   "settings.lookup_secret.confirm": "Ich habe die Codes gespeichert",
   "settings.lookup_secret.copied": "Kopiert",

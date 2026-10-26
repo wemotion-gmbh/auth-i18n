@@ -1,7 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.2.5
 
+- Texts after the settings tests of W1-voll PR9a (23.10.), for kratos-flow 0.3.6:
+  - Message 4000015 (`ErrorValidationSuchNoWebAuthnUser`) names the passkey too: „Dieses Konto existiert nicht oder hat weder einen Passkey noch einen Sicherheitsschlüssel eingerichtet.“ (`de.json`, `de-sie.json`; `en.json` likewise). Kratos sends it for a passkey sign-in as well, e.g. after the passkey was removed; the old text named only the security key.
+  - New UI keys `settings.credential.remove-unnamed` („{name} vom {date} entfernen“) and `settings.credential.remove-unnamed-undated` („{name} entfernen“), same in both forms, in `test/renderer-ui-keys.json`: the remove button of a passkey or security key without a name. Kratos names such a credential "unnamed" in its remove label (1050018/1050020, `x/webauthnx/nodes.go:76,86`), and its passkey method stores no name at all, so the button read „Passkey „unnamed“ entfernen“. kratos-flow fills `{name}` with its fallback name (`settings.passkey.default-name` / `settings.webauthn.title`) and `{date}` with the date the credential was added.
+- Tests: 4000015 names passkey and security key in both German catalogs, the two remove keys are pinned with their placeholders in both forms and are in the renderer key list.
 - `test/renderer-ui-keys.json` lists `error.page.text-expired` and `error.page.text-network`, which kratos-flow 0.3.1 requires (`REQUIRED_UI_KEYS`). `error.page.id-label` stays listed, because consumers on kratos-flow 0.3.0 (canou-auth) still require it. Test data only; the catalogs do not change.
 
 ## 0.2.4

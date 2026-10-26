@@ -454,3 +454,29 @@ describe("matrix D1 texts (0.2.4, L4b, L11, R1)", () => {
     }
   });
 });
+
+describe("passkey and security key texts after the settings tests (PR9a, 23.10.)", () => {
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const UNNAMED = "settings.credential.remove-unnamed";
+  const UNDATED = "settings.credential.remove-unnamed-undated";
+
+  it("names the passkey and the security key in 4000015, which Kratos sends for both sign-ins", () => {
+    // A passkey sign-in after the passkey was removed showed the security-key-only text.
+    for (const [name, catalog] of Object.entries({ de, "de-sie": deSie })) {
+      assert.match(catalog["4000015"]!, /Passkey/, `${name}:4000015`);
+      assert.match(catalog["4000015"]!, /Sicherheitsschlüssel/, `${name}:4000015`);
+    }
+    assert.equal(de["4000015"], deSie["4000015"], "4000015 does not address the user");
+  });
+
+  it("has the remove texts for a credential without a name in both forms, with their placeholders, required by the renderer", () => {
+    // Kratos names such a credential "unnamed" in its remove label (Remove passkey "unnamed").
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.equal(catalog[UNNAMED], "{name} vom {date} entfernen", `${name}:${UNNAMED}`);
+      assert.equal(catalog[UNDATED], "{name} entfernen", `${name}:${UNDATED}`);
+      assert.deepEqual(placeholders(catalog[UNNAMED]!), ["date", "name"]);
+      assert.deepEqual(placeholders(catalog[UNDATED]!), ["name"]);
+    }
+    assert.ok(rendererKeys.includes(UNNAMED) && rendererKeys.includes(UNDATED));
+  });
+});

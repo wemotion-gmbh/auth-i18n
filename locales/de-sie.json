@@ -98,7 +98,7 @@
   "4000012": "Dieser Backup-Code wurde bereits verwendet.",
   "4000013": "Sie haben keinen Sicherheitsschlüssel eingerichtet.",
   "4000014": "Sie haben keine Backup-Codes eingerichtet.",
-  "4000015": "Dieses Konto existiert nicht oder hat keinen Sicherheitsschlüssel eingerichtet.",
+  "4000015": "Dieses Konto existiert nicht oder hat weder einen Passkey noch einen Sicherheitsschlüssel eingerichtet.",
   "4000016": "Der Backup-Code ist ungültig.",
   "4000017": "Bitte geben Sie höchstens {max_length} Zeichen ein (bisher {actual_length}).",
   "4000018": "Der Wert muss mindestens {minimum} betragen, ist aber {actual}.",
