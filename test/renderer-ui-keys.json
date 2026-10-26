@@ -128,6 +128,8 @@
     "registration.step.traits.subtitle",
     "registration.title",
     "settings.aal2-required",
+    "settings.credential.remove-unnamed",
+    "settings.credential.remove-unnamed-undated",
     "settings.link",
     "settings.lookup_secret.confirm",
     "settings.lookup_secret.copied",
