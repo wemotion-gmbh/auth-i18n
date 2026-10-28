@@ -480,3 +480,193 @@ describe("passkey and security key texts after the settings tests (PR9a, 23.10.)
     assert.ok(rendererKeys.includes(UNNAMED) && rendererKeys.includes(UNDATED));
   });
 });
+
+describe("settings overview: groups, rows, status and buttons (kratos-flow 0.4.0)", () => {
+  // The settings page shows one row per area with its status and one button; the form opens
+  // below the row. Group titles, row status and button texts do not address the user, so both
+  // forms say the same; the e-mail hint does and is a real translation.
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const NEUTRAL: Record<string, string> = {
+    "settings.group.profile": "Persönliche Angaben",
+    "settings.group.sign-in": "Anmeldung",
+    "settings.group.protection": "Zusätzlicher Schutz",
+    "settings.passkeys.title": "Passkeys und Sicherheitsschlüssel",
+    "settings.totp.app-title": "Authenticator-App",
+    "settings.summary.not-set": "Nicht angegeben",
+    "settings.summary.passkey.none": "Kein Passkey",
+    "settings.summary.passkey.one": "1 Passkey",
+    "settings.summary.passkey.other": "{count} Passkeys",
+    "settings.summary.webauthn.none": "Kein Sicherheitsschlüssel",
+    "settings.summary.webauthn.one": "1 Sicherheitsschlüssel",
+    "settings.summary.webauthn.other": "{count} Sicherheitsschlüssel",
+    "settings.summary.totp.on": "An",
+    "settings.summary.totp.off": "Aus",
+    "settings.summary.lookup_secret.on": "Eingerichtet",
+    "settings.summary.lookup_secret.off": "Keine erzeugt",
+    "settings.summary.lookup_secret.pending": "Nicht bestätigt",
+    "settings.summary.oidc.linked": "{provider}: verknüpft",
+    "settings.summary.oidc.not-linked": "{provider}: nicht verknüpft",
+    "settings.action.change": "Ändern",
+    "settings.action.manage": "Verwalten",
+    "settings.action.set-up": "Einrichten",
+    "settings.action.create": "Erzeugen",
+    "settings.action.close": "Schließen",
+    "settings.profile.email.hint-details": "Was passiert dabei?",
+  };
+  const ADDRESSED = ["settings.passkeys.description", "settings.profile.email.hint-short", "settings.profile.email.hint-more"];
+  const NEW_KEYS = [...Object.keys(NEUTRAL), ...ADDRESSED];
+
+  it("has every new key in both forms, non-empty, and in the renderer key list", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      NEW_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map((key) => `${name}:${key}`),
+    );
+    assert.deepEqual(missing, []);
+    assert.deepEqual(NEW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
+  });
+
+  it("keeps the approved wording of group titles, status and buttons, the same in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(NEUTRAL)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+  });
+
+  it("uses only {count} and {provider} as placeholders, none in the other new keys", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) {
+        const expected = key.endsWith(".other") ? ["count"] : key.startsWith("settings.summary.oidc.") ? ["provider"] : [];
+        assert.deepEqual(placeholders(catalog[key]!), expected, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("addresses the user in the catalog's form in the passkey description and the e-mail hint", () => {
+    for (const key of ADDRESSED) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} should use the Sie form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} should use the Du form`);
+      assert.notEqual(uiDe[key], uiDeSie[key], key);
+    }
+  });
+
+  it("says the e-mail essentials in one sentence and keeps every point of the long hint behind the disclosure (S16)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const short = catalog["settings.profile.email.hint-short"]!;
+      const more = catalog["settings.profile.email.hint-more"]!;
+      // One sentence: the new address counts at once, the old one stops at once, check it.
+      assert.equal(short.match(/[.!?](?=\s|$)/g)?.length, 1, `${name}: one sentence`);
+      assert.match(short, /neue Adresse gilt sofort/, name);
+      assert.match(short, /alte/, name);
+      assert.match(short, /genau/, name);
+      // The rest: all connected services, booking and invoice e-mails, a code to the new address,
+      // login and recovery with the old address end, a typo locks out code-only sign-ins.
+      for (const part of [/allen verbundenen Diensten/, /Buchungen und Rechnungen/, /Code an die neue Adresse/, /Anmeldung/, /Wiederherstellung/, /Tippfehler/]) {
+        assert.match(more, part, `${name}: ${part}`);
+      }
+      assert.doesNotMatch(`${short} ${more}`, /Passwort/, name);
+    }
+  });
+});
+
+describe("settings overview: row titles and status texts", () => {
+  // A row reads „<button> <title>“ (e.g. „Ändern Passwort“) and its status is a state, not
+  // an action: titles are nouns, the same in both forms, and every status starts with a
+  // capital letter. Kratos does not tell whether a password is set, so the password row has
+  // no status at all.
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const TITLES: Record<string, string> = {
+    "settings.profile.title": "Name und E-Mail-Adresse",
+    "settings.profile.name.title": "Name",
+    "settings.profile.email.title": "E-Mail-Adresse",
+    "settings.password.title": "Passwort",
+    "settings.passkeys.title": "Passkeys und Sicherheitsschlüssel",
+    "settings.passkey.title": "Passkeys",
+    "settings.webauthn.title": "Sicherheitsschlüssel",
+    "settings.oidc.title": "Verknüpfte Konten",
+    "settings.totp.app-title": "Authenticator-App",
+    "settings.lookup_secret.title": "Backup-Codes",
+  };
+  const ACTIONS = ["settings.action.change", "settings.action.manage", "settings.action.set-up", "settings.action.create", "settings.action.close"];
+
+  it("uses the same noun titles in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(TITLES)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+  });
+
+  it("has no row title that repeats a button verb", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const verbs = ACTIONS.map((key) => catalog[key]!.toLowerCase());
+      for (const key of Object.keys(TITLES)) {
+        const words = catalog[key]!.toLowerCase().split(/\s+/);
+        assert.deepEqual(words.filter((w) => verbs.includes(w)), [], `${name}:${key}`);
+      }
+    }
+  });
+
+  it("starts every status with a capital letter, a digit or a placeholder", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const statuses = Object.keys(catalog).filter((key) => key.startsWith("settings.summary."));
+      assert.equal(statuses.length, 14, name);
+      for (const key of statuses) assert.match(catalog[key]!, /^(?:\p{Lu}|\d|\{)/u, `${name}:${key}`);
+    }
+  });
+
+  it("has no password status: neither in the catalogs nor in the renderer key list", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) assert.equal(catalog["settings.summary.password"], undefined, name);
+    assert.ok(!rendererKeys.includes("settings.summary.password"));
+  });
+});
+
+describe("settings overview: texts inside the rows and the page heading", () => {
+  // An open row shows its description and the hints of its forms; the Du form says the same
+  // as the Sie form there, with the terms of the row titles (Backup-Codes, Sicherheitsschlüssel,
+  // verknüpft) and without the old ones.
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const PANEL_KEYS = [
+    "settings.passkeys.description",
+    "settings.passkey.description",
+    "settings.passkey.info",
+    "settings.webauthn.description",
+    "settings.webauthn.info",
+    "settings.oidc.description",
+    "settings.oidc.info",
+    "settings.totp.description",
+    "settings.lookup_secret.description",
+  ];
+  const OLD_TERMS = /Hardware-Token|Wiederherstellungscode|Verbunden|Verbinde|Social-Login|TOTP|2FA/;
+  const DU: Record<string, string> = {
+    "settings.title": "Anmeldung und Sicherheit",
+    "settings.subtitle": "Verwalte, wie du dich anmeldest und dein Konto schützt.",
+    "settings.passkey.description": "Melde dich mit Fingerabdruck, Gesichtserkennung oder der Geräte-PIN an, ganz ohne Passwort.",
+    "settings.passkey.info": "Ein Passkey ist an dein Gerät gebunden. Du kannst mehrere Passkeys anlegen und einzeln entfernen.",
+    "settings.webauthn.description": "Melde dich mit einem Sicherheitsschlüssel (z. B. einem USB-Schlüssel) an.",
+    "settings.webauthn.info": "Ein Sicherheitsschlüssel ersetzt das Passwort, nicht den zweiten Faktor.",
+    "settings.oidc.description": "Verknüpfe dein Konto mit einem externen Anbieter.",
+    "settings.oidc.info": "Mit verknüpften Konten dieser Anbieter kannst du dich bei deinem Konto anmelden.",
+    "settings.totp.description": "Schütze dein Konto zusätzlich mit einer Authenticator-App (z. B. Google Authenticator oder Microsoft Authenticator).",
+    "settings.lookup_secret.description":
+      "Backup-Codes sind eine sichere Reserve für die Zwei-Faktor-Authentifizierung. Damit kommst du wieder in dein Konto, wenn du dein Gerät für den zweiten Faktor verlierst.",
+    "settings.messages.toast-title.success": "Einstellungen gespeichert",
+  };
+
+  it("uses none of the old terms in a row's description or hints", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of PANEL_KEYS) assert.doesNotMatch(catalog[key] ?? "", OLD_TERMS, `${name}:${key}`);
+    }
+  });
+
+  it("pins the Du texts that match the Sie form", () => {
+    for (const [key, text] of Object.entries(DU)) assert.equal(uiDe[key], text, key);
+  });
+
+  it("writes each description and hint as a sentence, and a hint does not repeat its description", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of PANEL_KEYS) assert.match(catalog[key] ?? "", /\.$/, `${name}:${key}`);
+      assert.notEqual(catalog["settings.passkey.info"], catalog["settings.passkey.description"], name);
+      assert.notEqual(catalog["settings.webauthn.info"], catalog["settings.webauthn.description"], name);
+    }
+  });
+
+  it("names the page and the saved state the same in both forms", () => {
+    for (const key of ["settings.title", "settings.messages.toast-title.success"]) assert.equal(uiDe[key], uiDeSie[key], key);
+  });
+});
