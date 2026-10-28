@@ -615,3 +615,58 @@ describe("settings overview: row titles and status texts", () => {
     assert.ok(!rendererKeys.includes("settings.summary.password"));
   });
 });
+
+describe("settings overview: texts inside the rows and the page heading", () => {
+  // An open row shows its description and the hints of its forms; the Du form says the same
+  // as the Sie form there, with the terms of the row titles (Backup-Codes, Sicherheitsschlüssel,
+  // verknüpft) and without the old ones.
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const PANEL_KEYS = [
+    "settings.passkeys.description",
+    "settings.passkey.description",
+    "settings.passkey.info",
+    "settings.webauthn.description",
+    "settings.webauthn.info",
+    "settings.oidc.description",
+    "settings.oidc.info",
+    "settings.totp.description",
+    "settings.lookup_secret.description",
+  ];
+  const OLD_TERMS = /Hardware-Token|Wiederherstellungscode|Verbunden|Verbinde|Social-Login|TOTP|2FA/;
+  const DU: Record<string, string> = {
+    "settings.title": "Anmeldung und Sicherheit",
+    "settings.subtitle": "Verwalte, wie du dich anmeldest und dein Konto schützt.",
+    "settings.passkey.description": "Melde dich mit Fingerabdruck, Gesichtserkennung oder der Geräte-PIN an, ganz ohne Passwort.",
+    "settings.passkey.info": "Ein Passkey ist an dein Gerät gebunden. Du kannst mehrere Passkeys anlegen und einzeln entfernen.",
+    "settings.webauthn.description": "Melde dich mit einem Sicherheitsschlüssel (z. B. einem USB-Schlüssel) an.",
+    "settings.webauthn.info": "Ein Sicherheitsschlüssel ersetzt das Passwort, nicht den zweiten Faktor.",
+    "settings.oidc.description": "Verknüpfe dein Konto mit einem externen Anbieter.",
+    "settings.oidc.info": "Mit verknüpften Konten dieser Anbieter kannst du dich bei deinem Konto anmelden.",
+    "settings.totp.description": "Schütze dein Konto zusätzlich mit einer Authenticator-App (z. B. Google Authenticator oder Microsoft Authenticator).",
+    "settings.lookup_secret.description":
+      "Backup-Codes sind eine sichere Reserve für die Zwei-Faktor-Authentifizierung. Damit kommst du wieder in dein Konto, wenn du dein Gerät für den zweiten Faktor verlierst.",
+    "settings.messages.toast-title.success": "Einstellungen gespeichert",
+  };
+
+  it("uses none of the old terms in a row's description or hints", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of PANEL_KEYS) assert.doesNotMatch(catalog[key] ?? "", OLD_TERMS, `${name}:${key}`);
+    }
+  });
+
+  it("pins the Du texts that match the Sie form", () => {
+    for (const [key, text] of Object.entries(DU)) assert.equal(uiDe[key], text, key);
+  });
+
+  it("writes each description and hint as a sentence, and a hint does not repeat its description", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of PANEL_KEYS) assert.match(catalog[key] ?? "", /\.$/, `${name}:${key}`);
+      assert.notEqual(catalog["settings.passkey.info"], catalog["settings.passkey.description"], name);
+      assert.notEqual(catalog["settings.webauthn.info"], catalog["settings.webauthn.description"], name);
+    }
+  });
+
+  it("names the page and the saved state the same in both forms", () => {
+    for (const key of ["settings.title", "settings.messages.toast-title.success"]) assert.equal(uiDe[key], uiDeSie[key], key);
+  });
+});
