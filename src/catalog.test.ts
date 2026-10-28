@@ -480,3 +480,88 @@ describe("passkey and security key texts after the settings tests (PR9a, 23.10.)
     assert.ok(rendererKeys.includes(UNNAMED) && rendererKeys.includes(UNDATED));
   });
 });
+
+describe("settings overview: groups, rows, status and buttons (kratos-flow 0.4.0)", () => {
+  // The settings page shows one row per area with its status and one button; the form opens
+  // below the row. Group titles, row status and button texts do not address the user, so both
+  // forms say the same; the e-mail hint does and is a real translation.
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const NEUTRAL: Record<string, string> = {
+    "settings.group.profile": "Persönliche Angaben",
+    "settings.group.sign-in": "Anmeldung",
+    "settings.group.protection": "Zusätzlicher Schutz",
+    "settings.passkeys.title": "Passkeys und Sicherheitsschlüssel",
+    "settings.totp.app-title": "Authenticator-App",
+    "settings.summary.password": "Passwort festlegen oder ändern",
+    "settings.summary.not-set": "Nicht angegeben",
+    "settings.summary.passkey.none": "kein Passkey",
+    "settings.summary.passkey.one": "1 Passkey",
+    "settings.summary.passkey.other": "{count} Passkeys",
+    "settings.summary.webauthn.none": "kein Sicherheitsschlüssel",
+    "settings.summary.webauthn.one": "1 Sicherheitsschlüssel",
+    "settings.summary.webauthn.other": "{count} Sicherheitsschlüssel",
+    "settings.summary.totp.on": "An",
+    "settings.summary.totp.off": "Aus",
+    "settings.summary.lookup_secret.on": "Eingerichtet",
+    "settings.summary.lookup_secret.off": "Keine erzeugt",
+    "settings.summary.oidc.linked": "{provider}: verknüpft",
+    "settings.summary.oidc.not-linked": "{provider}: nicht verknüpft",
+    "settings.action.change": "Ändern",
+    "settings.action.manage": "Verwalten",
+    "settings.action.set-up": "Einrichten",
+    "settings.action.create": "Erzeugen",
+    "settings.action.close": "Schließen",
+    "settings.profile.email.hint-details": "Was passiert dabei?",
+  };
+  const ADDRESSED = ["settings.passkeys.description", "settings.profile.email.hint-short", "settings.profile.email.hint-more"];
+  const NEW_KEYS = [...Object.keys(NEUTRAL), ...ADDRESSED];
+
+  it("has every new key in both forms, non-empty, and in the renderer key list", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      NEW_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map((key) => `${name}:${key}`),
+    );
+    assert.deepEqual(missing, []);
+    assert.deepEqual(NEW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
+  });
+
+  it("keeps the approved wording of group titles, status and buttons, the same in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(NEUTRAL)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+  });
+
+  it("uses only {count} and {provider} as placeholders, none in the other new keys", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) {
+        const expected = key.endsWith(".other") ? ["count"] : key.startsWith("settings.summary.oidc.") ? ["provider"] : [];
+        assert.deepEqual(placeholders(catalog[key]!), expected, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("addresses the user in the catalog's form in the passkey description and the e-mail hint", () => {
+    for (const key of ADDRESSED) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} should use the Sie form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} should use the Du form`);
+      assert.notEqual(uiDe[key], uiDeSie[key], key);
+    }
+  });
+
+  it("says the e-mail essentials in one sentence and keeps every point of the long hint behind the disclosure (S16)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const short = catalog["settings.profile.email.hint-short"]!;
+      const more = catalog["settings.profile.email.hint-more"]!;
+      // One sentence: the new address counts at once, the old one stops at once, check it.
+      assert.equal(short.match(/[.!?](?=\s|$)/g)?.length, 1, `${name}: one sentence`);
+      assert.match(short, /neue Adresse gilt sofort/, name);
+      assert.match(short, /alte/, name);
+      assert.match(short, /genau/, name);
+      // The rest: all connected services, booking and invoice e-mails, a code to the new address,
+      // login and recovery with the old address end, a typo locks out code-only sign-ins.
+      for (const part of [/allen verbundenen Diensten/, /Buchungen und Rechnungen/, /Code an die neue Adresse/, /Anmeldung/, /Wiederherstellung/, /Tippfehler/]) {
+        assert.match(more, part, `${name}: ${part}`);
+      }
+      assert.doesNotMatch(`${short} ${more}`, /Passwort/, name);
+    }
+  });
+});

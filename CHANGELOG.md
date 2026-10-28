@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.6
+
+- New UI keys for the settings overview of kratos-flow 0.4.0 (one row per area with its status and one button; the form opens below the row, one row at a time), in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form), all in `test/renderer-ui-keys.json`:
+  - Group titles `settings.group.profile` („Persönliche Angaben“), `settings.group.sign-in` („Anmeldung“), `settings.group.protection` („Zusätzlicher Schutz“).
+  - The passkey row, which holds passkeys and security keys: `settings.passkeys.title` („Passkeys und Sicherheitsschlüssel“) and `settings.passkeys.description` (one sentence for both methods).
+  - The row of the authenticator app: `settings.totp.app-title` („Authenticator-App“; `settings.totp.title` stays the section title of layouts that show every form at once).
+  - Row status: `settings.summary.password` („Passwort festlegen oder ändern“: Kratos does not tell whether a password is set), `settings.summary.not-set` („Nicht angegeben“, an empty name), `settings.summary.passkey.{none,one,other}` and `settings.summary.webauthn.{none,one,other}` („kein Passkey“, „1 Passkey“, „{count} Passkeys“ …), `settings.summary.totp.{on,off}` („An“, „Aus“), `settings.summary.lookup_secret.{on,off}` („Eingerichtet“, „Keine erzeugt“), `settings.summary.oidc.{linked,not-linked}` („{provider}: verknüpft“, „{provider}: nicht verknüpft“).
+  - Row buttons `settings.action.change` („Ändern“), `settings.action.manage` („Verwalten“), `settings.action.set-up` („Einrichten“), `settings.action.create` („Erzeugen“), `settings.action.close` („Schließen“).
+  - The e-mail change hint in two parts: `settings.profile.email.hint-short` (one sentence: the new address counts at once, the old one stops at once, check it) and `settings.profile.email.hint-more` (connected services, booking and invoice e-mails, the code, login and recovery, the typo risk) behind the disclosure `settings.profile.email.hint-details` („Was passiert dabei?“). `settings.profile.email.hint` stays for layouts that show the whole text at once.
+- Group titles, status and button texts do not address the user and are the same in both forms; the passkey description and the e-mail hint are real translations.
+- Tests: every new key exists non-empty in both catalogs and in the renderer key list, the approved wording is pinned, `{count}` and `{provider}` are the only placeholders, the addressed texts use the catalog's form, and the two e-mail hint parts together keep every point of the long hint.
+
 ## 0.2.5
 
 - Texts after the settings tests of W1-voll PR9a (23.10.), for kratos-flow 0.3.6:
