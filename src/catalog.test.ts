@@ -492,18 +492,18 @@ describe("settings overview: groups, rows, status and buttons (kratos-flow 0.4.0
     "settings.group.protection": "Zusätzlicher Schutz",
     "settings.passkeys.title": "Passkeys und Sicherheitsschlüssel",
     "settings.totp.app-title": "Authenticator-App",
-    "settings.summary.password": "Passwort festlegen oder ändern",
     "settings.summary.not-set": "Nicht angegeben",
-    "settings.summary.passkey.none": "kein Passkey",
+    "settings.summary.passkey.none": "Kein Passkey",
     "settings.summary.passkey.one": "1 Passkey",
     "settings.summary.passkey.other": "{count} Passkeys",
-    "settings.summary.webauthn.none": "kein Sicherheitsschlüssel",
+    "settings.summary.webauthn.none": "Kein Sicherheitsschlüssel",
     "settings.summary.webauthn.one": "1 Sicherheitsschlüssel",
     "settings.summary.webauthn.other": "{count} Sicherheitsschlüssel",
     "settings.summary.totp.on": "An",
     "settings.summary.totp.off": "Aus",
     "settings.summary.lookup_secret.on": "Eingerichtet",
     "settings.summary.lookup_secret.off": "Keine erzeugt",
+    "settings.summary.lookup_secret.pending": "Nicht bestätigt",
     "settings.summary.oidc.linked": "{provider}: verknüpft",
     "settings.summary.oidc.not-linked": "{provider}: nicht verknüpft",
     "settings.action.change": "Ändern",
@@ -563,5 +563,55 @@ describe("settings overview: groups, rows, status and buttons (kratos-flow 0.4.0
       }
       assert.doesNotMatch(`${short} ${more}`, /Passwort/, name);
     }
+  });
+});
+
+describe("settings overview: row titles and status texts", () => {
+  // A row reads „<button> <title>“ (e.g. „Ändern Passwort“) and its status is a state, not
+  // an action: titles are nouns, the same in both forms, and every status starts with a
+  // capital letter. Kratos does not tell whether a password is set, so the password row has
+  // no status at all.
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const TITLES: Record<string, string> = {
+    "settings.profile.title": "Name und E-Mail-Adresse",
+    "settings.profile.name.title": "Name",
+    "settings.profile.email.title": "E-Mail-Adresse",
+    "settings.password.title": "Passwort",
+    "settings.passkeys.title": "Passkeys und Sicherheitsschlüssel",
+    "settings.passkey.title": "Passkeys",
+    "settings.webauthn.title": "Sicherheitsschlüssel",
+    "settings.oidc.title": "Verknüpfte Konten",
+    "settings.totp.app-title": "Authenticator-App",
+    "settings.lookup_secret.title": "Backup-Codes",
+  };
+  const ACTIONS = ["settings.action.change", "settings.action.manage", "settings.action.set-up", "settings.action.create", "settings.action.close"];
+
+  it("uses the same noun titles in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(TITLES)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+  });
+
+  it("has no row title that repeats a button verb", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const verbs = ACTIONS.map((key) => catalog[key]!.toLowerCase());
+      for (const key of Object.keys(TITLES)) {
+        const words = catalog[key]!.toLowerCase().split(/\s+/);
+        assert.deepEqual(words.filter((w) => verbs.includes(w)), [], `${name}:${key}`);
+      }
+    }
+  });
+
+  it("starts every status with a capital letter, a digit or a placeholder", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const statuses = Object.keys(catalog).filter((key) => key.startsWith("settings.summary."));
+      assert.equal(statuses.length, 14, name);
+      for (const key of statuses) assert.match(catalog[key]!, /^(?:\p{Lu}|\d|\{)/u, `${name}:${key}`);
+    }
+  });
+
+  it("has no password status: neither in the catalogs nor in the renderer key list", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) assert.equal(catalog["settings.summary.password"], undefined, name);
+    assert.ok(!rendererKeys.includes("settings.summary.password"));
   });
 });
