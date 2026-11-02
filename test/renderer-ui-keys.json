@@ -248,6 +248,7 @@
     "sso.account.register.name-hint",
     "sso.account.register.submit",
     "sso.account.register.text",
+    "sso.account.register.text-canou",
     "sso.account.register.title",
     "sso.account.reset-password",
     "sso.account.verify.button",

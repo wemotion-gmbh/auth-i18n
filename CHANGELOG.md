@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.8
+
+- The one-click step „Konto anlegen“ names canou next to the site (Alex, 02.11.): the account is created at both, and the consent checkbox already names both privacy policies.
+  - `sso.account.register.text`: „Für {email} legen wir jetzt Ihr Konto bei {displayName} und canou an.“ (`ui.de-sie.json`) / „… dein Konto bei {displayName} und canou an.“ (`ui.de.json`); was „… bei {displayName} an.“
+  - New `sso.account.register.text-canou`: „Für {email} legen wir jetzt Ihr canou-Konto an.“ / „… dein canou-Konto an.“, for a step without a site name or on canou itself (kratos-flow picks it). In `test/renderer-ui-keys.json`.
+  - Unchanged: `sso.account.error.conflict` and `sso.account.error.inactive` name the site as the contact („wenden Sie sich an {displayName}“), not as the place of the account. No other `sso.account.*` text names the site.
+- Tests: both texts pinned in both forms, `{email}` the only placeholder of `text-canou`, every text that names the site as the place of an account names canou too, the contact texts keep the site alone.
+
 ## 0.2.7
 
 - New UI keys for the SSO account step and the canou sign-in on other pages (SSO plan v2 §7.3, §7.4, §12.1–12.4; decisions F1 and F3 of 01.11.), in `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form), all in `test/renderer-ui-keys.json` for kratos-flow's `AccountStep`, `CanouSignInButton`, `CanouPasswordHint` and `PoweredByCanou` (KF2):

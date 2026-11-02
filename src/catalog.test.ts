@@ -729,7 +729,10 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     "sso.account.error.generic": "Das hat gerade nicht geklappt. Bitte versuchen Sie es noch einmal.",
     "sso.account.error.temporarily-unavailable": "Die Anmeldung ist gerade nicht möglich. Bitte versuchen Sie es in ein paar Minuten noch einmal.",
     "sso.account.verify.text": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
-    "sso.account.register.text": "Für {email} legen wir jetzt Ihr Konto bei {displayName} an.",
+    // 0.2.8: the account is created at the site and at canou, so the text names both; without a
+    // site of its own (or on canou itself) only canou.
+    "sso.account.register.text": "Für {email} legen wir jetzt Ihr Konto bei {displayName} und canou an.",
+    "sso.account.register.text-canou": "Für {email} legen wir jetzt Ihr canou-Konto an.",
     "sso.account.register.name-hint": "Wir haben Ihren Namen aus Ihrer Anmeldung übernommen. Sie können ihn hier ändern.",
     "sso.account.register.consent.required": "Bitte setzen Sie das Häkchen, um Ihr Konto anzulegen.",
     "sso.button.unavailable": "Ihre canou-Anmeldedaten gelten auch hier. Melden Sie sich einfach direkt hier an.",
@@ -752,6 +755,7 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     "sso.account.error.conflict": ["displayName"],
     "sso.account.link.text": ["email"],
     "sso.account.register.text": ["displayName", "email"],
+    "sso.account.register.text-canou": ["email"],
     "sso.account.register.consent.one": ["policy"],
     "sso.account.register.consent.other": ["policies"],
     "sso.announce.signed-in": ["name"],
@@ -860,6 +864,28 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
       assert.equal(text(3, 15), "Noch 3 Versuche. Danach wird das Verbinden für 15 Minuten pausiert.", name);
       assert.equal(text(1, 15), "Noch ein Versuch. Danach wird das Verbinden für 15 Minuten pausiert.", name);
       assert.equal(text(1, 1), "Noch ein Versuch. Danach wird das Verbinden für eine Minute pausiert.", name);
+    }
+  });
+
+  it("names the site and canou as the place of the new account, canou alone without a site (0.2.8)", () => {
+    assert.equal(uiDe["sso.account.register.text"], "Für {email} legen wir jetzt dein Konto bei {displayName} und canou an.");
+    assert.equal(uiDe["sso.account.register.text-canou"], "Für {email} legen wir jetzt dein canou-Konto an.");
+    const values = { email: "alex@example.org", displayName: "Leinerstift e. V." };
+    assert.equal(
+      interpolate(uiDeSie["sso.account.register.text"]!, values),
+      "Für alex@example.org legen wir jetzt Ihr Konto bei Leinerstift e. V. und canou an.",
+    );
+    assert.equal(interpolate(uiDeSie["sso.account.register.text-canou"]!, values), "Für alex@example.org legen wir jetzt Ihr canou-Konto an.");
+    // Where the site is the contact and not the place of the account, it stays alone.
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of ["sso.account.error.conflict", "sso.account.error.inactive"]) {
+        assert.match(catalog[key]!, /\{displayName\}\.$/, `${name}:${key}`);
+        assert.doesNotMatch(catalog[key]!, /canou/, `${name}:${key}`);
+      }
+      // Every text that names the site as the place of an account names canou too.
+      const accountAtSite = NEW_KEYS.filter((k) => /Konto bei \{displayName\}/.test(catalog[k]!));
+      assert.deepEqual(accountAtSite, ["sso.account.register.text"], name);
+      for (const key of accountAtSite) assert.match(catalog[key]!, /\{displayName\} und canou\b/, `${name}:${key}`);
     }
   });
 
