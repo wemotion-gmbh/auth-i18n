@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
+import { interpolate } from "./interpolate";
+
 const readJson = <T>(path: string): T => JSON.parse(readFileSync(new URL(path, import.meta.url), "utf8")) as T;
 
 const de = readJson<Record<string, string>>("../locales/de.json");
@@ -31,7 +33,8 @@ const word = (alternatives: string) => new RegExp(`(?<!\\p{L})(?:${alternatives}
 const DU_PRONOUN = word("du|dich|dir|dein\\p{L}*");
 const DU_IMPERATIVE = word(
   [
-    "prüf", "gib", "versuch", "wähl", "mach", "stell", "klick", "melde", "richte", "ändere",
+    // "versuch" not after an article: „Noch ein Versuch.“ is the noun (SSO attempts text).
+    "prüf", "gib", "(?<!(?:ein|einen)\\s)versuch", "wähl", "mach", "stell", "klick", "melde", "richte", "ändere",
     "bestätige", "bewahre", "schließe", "löse", "starte", "aktualisiere", "lege", "wende",
     "nutze", "füge", "sende", "gehe",
     // -e forms of the stems above. "prüfe" only before a word, because "Prüfe…" is a
@@ -144,6 +147,8 @@ describe("Sie-form checker", () => {
   it("self-test: finds Du imperatives ending in -e, but not the noun or a progress label", () => {
     for (const du of [
       "Bitte versuche es erneut.",
+      "Bitte versuch es erneut.",
+      "Versuch die Registrierung erneut.",
       "Bitte prüfe die Schreibweise.",
       "Wähle eine Methode.",
       "Mache ein Foto.",
@@ -152,7 +157,13 @@ describe("Sie-form checker", () => {
     ]) {
       assert.ok(DU_IMPERATIVE.test(du), `checker misses: ${du}`);
     }
-    for (const neutral of ["Zu viele Versuche. Bitte warten Sie einen Moment.", "Prüfe…", "Bitte versuchen Sie es erneut."]) {
+    for (const neutral of [
+      "Zu viele Versuche. Bitte warten Sie einen Moment.",
+      "Prüfe…",
+      "Bitte versuchen Sie es erneut.",
+      "Noch ein Versuch.",
+      "Sie haben noch einen Versuch.",
+    ]) {
       assert.ok(!DU_IMPERATIVE.test(neutral), `false positive: ${neutral}`);
     }
   });
@@ -668,5 +679,201 @@ describe("settings overview: texts inside the rows and the page heading", () => 
 
   it("names the page and the saved state the same in both forms", () => {
     for (const key of ["settings.title", "settings.messages.toast-title.success"]) assert.equal(uiDe[key], uiDeSie[key], key);
+  });
+});
+
+describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 §7.3, §7.4, §12, F1, F2, F3)", () => {
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  // Texts that do not address the user: the same in both forms (plan §12.1 wording).
+  const NEUTRAL: Record<string, string> = {
+    "sso.account.loading": "Anmeldung wird abgeschlossen…",
+    "sso.account.link.title": "Bestehendes Konto verbinden",
+    "sso.account.link.submit": "Konto verbinden",
+    "sso.account.other-account": "Mit einem anderen Konto anmelden",
+    "sso.account.error.invalid-credentials": "Das Passwort ist nicht korrekt.",
+    "sso.account.error.attempts-left.one": "Noch ein Versuch.",
+    "sso.account.error.attempts-left.other": "Noch {count} Versuche.",
+    "sso.account.error.pause-after.one": "Danach wird das Verbinden für eine Minute pausiert.",
+    "sso.account.error.pause-after.other": "Danach wird das Verbinden für {minutes} Minuten pausiert.",
+    "sso.account.error.reset-required": "Für dieses Konto muss das Passwort neu gesetzt werden.",
+    "sso.account.reset-password": "Passwort zurücksetzen",
+    "sso.account.verify.button": "E-Mail-Adresse bestätigen",
+    "sso.account.register.title": "Konto anlegen",
+    "sso.account.register.submit": "Konto anlegen",
+    "sso.account.register.consent.one": "Ich habe die {policy} gelesen und akzeptiere diese.",
+    "sso.account.register.consent.other": "Ich habe die Datenschutzerklärungen von {policies} gelesen und akzeptiere diese.",
+    "sso.account.register.consent.policy": "Datenschutzerklärung",
+    "sso.account.register.consent.and": "und",
+    "sso.button.label": "Mit canou anmelden",
+    "sso.button.checking": "Wird geprüft…",
+    "sso.powered-by.text": "Powered by canou",
+    // F2: the passive sentence under the Google/Microsoft buttons and on the registration page.
+    "sso.privacy.notice.one": "Es gilt die {policy}.",
+    "sso.privacy.notice.other": "Es gelten die Datenschutzerklärungen von {policies}.",
+  };
+  // Texts that address the user: a real translation per form. Sie wording from the plan where it
+  // has a text (§7.3, §7.4, §12.1, §12.4), the others new in the same style.
+  const SIE: Record<string, string> = {
+    "sso.account.link.text":
+      "Für {email} gibt es bereits ein Konto, zum Beispiel aus der canou-App oder der bisherigen Plattform. Bitte bestätigen Sie einmalig mit dem Passwort dieses Kontos, dass es Ihnen gehört. Danach ist es mit Ihrer Anmeldung verbunden.",
+    "sso.account.link.password": "Passwort Ihres bestehenden Kontos",
+    "sso.account.link.reset-sent": "Wir haben Ihnen eine E-Mail geschickt.",
+    "sso.account.error.locked.one":
+      "Zu viele Versuche. Bitte versuchen Sie es in einer Minute noch einmal oder setzen Sie das Passwort zurück.",
+    "sso.account.error.locked.other":
+      "Zu viele Versuche. Bitte versuchen Sie es in {minutes} Minuten noch einmal oder setzen Sie das Passwort zurück.",
+    "sso.account.error.inactive": "Dieses Konto ist gesperrt. Bitte wenden Sie sich an {displayName}.",
+    "sso.account.error.conflict":
+      "Dieses Konto ist bereits mit einer anderen Anmeldung verbunden. Bitte melden Sie sich mit dieser an oder wenden Sie sich an {displayName}.",
+    "sso.account.error.session-invalid": "Ihre Anmeldung ist abgelaufen. Bitte melden Sie sich erneut an.",
+    "sso.account.error.generic": "Das hat gerade nicht geklappt. Bitte versuchen Sie es noch einmal.",
+    "sso.account.error.temporarily-unavailable": "Die Anmeldung ist gerade nicht möglich. Bitte versuchen Sie es in ein paar Minuten noch einmal.",
+    "sso.account.verify.text": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+    "sso.account.register.text": "Für {email} legen wir jetzt Ihr Konto bei {displayName} an.",
+    "sso.account.register.name-hint": "Wir haben Ihren Namen aus Ihrer Anmeldung übernommen. Sie können ihn hier ändern.",
+    "sso.account.register.consent.required": "Bitte setzen Sie das Häkchen, um Ihr Konto anzulegen.",
+    "sso.button.unavailable": "Ihre canou-Anmeldedaten gelten auch hier. Melden Sie sich einfach direkt hier an.",
+    "sso.hint.password":
+      "Diese Website nutzt canou. Sie können sich hier mit dem Passwort Ihres canou-Kontos anmelden oder sich einen Code per E-Mail senden lassen.",
+    "sso.announce.signed-in": "Sie sind jetzt als {name} angemeldet.",
+  };
+  const NEW_KEYS = [...Object.keys(NEUTRAL), ...Object.keys(SIE)];
+  /** Existing keys the account step reuses instead of adding a copy. */
+  const REUSED: Record<string, string> = {
+    "forms.label.forgot-password": "Passwort vergessen?",
+    "property.first": "Vorname",
+    "property.last": "Nachname",
+  };
+  const PLACEHOLDERS: Record<string, string[]> = {
+    "sso.account.error.attempts-left.other": ["count"],
+    "sso.account.error.pause-after.other": ["minutes"],
+    "sso.account.error.locked.other": ["minutes"],
+    "sso.account.error.inactive": ["displayName"],
+    "sso.account.error.conflict": ["displayName"],
+    "sso.account.link.text": ["email"],
+    "sso.account.register.text": ["displayName", "email"],
+    "sso.account.register.consent.one": ["policy"],
+    "sso.account.register.consent.other": ["policies"],
+    "sso.announce.signed-in": ["name"],
+    "sso.privacy.notice.one": ["policy"],
+    "sso.privacy.notice.other": ["policies"],
+  };
+  /** Builds a sentence with policy links the way a consumer does (links as plain names here). */
+  const withPolicies = (catalog: Record<string, string>, base: string, names: string[]) => {
+    const category = new Intl.PluralRules("de").select(names.length);
+    const template = catalog[`${base}.${category}`]!;
+    const and = ` ${catalog["sso.account.register.consent.and"]} `;
+    const list = names.length > 1 ? `${names.slice(0, -1).join(", ")}${and}${names.at(-1)}` : names[0];
+    return interpolate(template, { policy: catalog["sso.account.register.consent.policy"], policies: list });
+  };
+
+  it("has every new key in both forms, non-empty, and in the renderer key list", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      NEW_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map((key) => `${name}:${key}`),
+    );
+    assert.deepEqual(missing, []);
+    assert.deepEqual(NEW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
+    // Every sso.* key of the catalogs is covered here (no untested extra key).
+    for (const catalog of Object.values(catalogs)) {
+      assert.deepEqual(Object.keys(catalog).filter((k) => k.startsWith("sso.")).sort(), [...NEW_KEYS].sort());
+    }
+  });
+
+  it("keeps the plan wording: neutral texts the same in both forms, the Sie form word for word", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(NEUTRAL)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+    for (const [key, text] of Object.entries(SIE)) assert.equal(uiDeSie[key], text, key);
+  });
+
+  it("uses Alex' wording for the Du password hint (plan §7.4)", () => {
+    assert.equal(uiDe["sso.hint.password"], "Du kannst direkt das Passwort verwenden, das du bei canou nutzt, da diese Website canou verwendet.");
+  });
+
+  it("addresses the user in the catalog's form (real translation, not a copy)", () => {
+    for (const key of Object.keys(SIE)) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} has no Sie form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} has no Du form`);
+      assert.ok(!SIE_FORM.test(uiDe[key]!), `ui.de:${key} has a Sie form`);
+    }
+  });
+
+  it("uses only the listed placeholders, the same in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) assert.deepEqual(placeholders(catalog[key]!), PLACEHOLDERS[key] ?? [], `${name}:${key}`);
+    }
+  });
+
+  it("has plural pairs: .one without a number placeholder, .other with it (ICU/CLDR categories one/other)", () => {
+    const plural = NEW_KEYS.filter((key) => /\.(one|other)$/.test(key));
+    assert.equal(plural.length, 10);
+    for (const key of plural) {
+      const base = key.replace(/\.(one|other)$/, "");
+      assert.ok(NEW_KEYS.includes(`${base}.one`) && NEW_KEYS.includes(`${base}.other`), base);
+    }
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of plural.filter((k) => k.endsWith(".one"))) {
+        assert.doesNotMatch(catalog[key]!, /\{(count|minutes)\}|\d/, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("builds the consent sentence of F1: one policy singular, two or more plural with every name", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.equal(withPolicies(catalog, "sso.account.register.consent", ["canou"]), "Ich habe die Datenschutzerklärung gelesen und akzeptiere diese.", name);
+      assert.equal(
+        withPolicies(catalog, "sso.account.register.consent", ["Leinerstift", "canou"]),
+        "Ich habe die Datenschutzerklärungen von Leinerstift und canou gelesen und akzeptiere diese.",
+        name,
+      );
+      assert.equal(
+        withPolicies(catalog, "sso.account.register.consent", ["Leinerstift", "Diakonie", "canou"]),
+        "Ich habe die Datenschutzerklärungen von Leinerstift, Diakonie und canou gelesen und akzeptiere diese.",
+        name,
+      );
+    }
+  });
+
+  it("builds the passive privacy sentence of F2 with the same links: one policy singular, two or more plural", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.equal(withPolicies(catalog, "sso.privacy.notice", ["canou"]), "Es gilt die Datenschutzerklärung.", name);
+      assert.equal(
+        withPolicies(catalog, "sso.privacy.notice", ["Leinerstift", "canou"]),
+        "Es gelten die Datenschutzerklärungen von Leinerstift und canou.",
+        name,
+      );
+      assert.equal(
+        withPolicies(catalog, "sso.privacy.notice", ["Leinerstift", "Diakonie", "canou"]),
+        "Es gelten die Datenschutzerklärungen von Leinerstift, Diakonie und canou.",
+        name,
+      );
+    }
+  });
+
+  it("joins the attempts and the pause into the plan text (F3: 5 failures, 15 minutes)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const text = (n: number, minutes: number) =>
+        [
+          interpolate(catalog[`sso.account.error.attempts-left.${new Intl.PluralRules("de").select(n)}`]!, { count: n }),
+          interpolate(catalog[`sso.account.error.pause-after.${new Intl.PluralRules("de").select(minutes)}`]!, { minutes }),
+        ].join(" ");
+      assert.equal(text(3, 15), "Noch 3 Versuche. Danach wird das Verbinden für 15 Minuten pausiert.", name);
+      assert.equal(text(1, 15), "Noch ein Versuch. Danach wird das Verbinden für 15 Minuten pausiert.", name);
+      assert.equal(text(1, 1), "Noch ein Versuch. Danach wird das Verbinden für eine Minute pausiert.", name);
+    }
+  });
+
+  it("reuses the existing keys for „Passwort vergessen?“ and the name labels", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(REUSED)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+    for (const key of NEW_KEYS) assert.ok(!/forgot|first-name|last-name/.test(key), `copy of a reused key: ${key}`);
+  });
+
+  it("shows no technical words or raw status names", () => {
+    const TECH = /\b(?:SSO|OIDC|OAuth|Kratos|Hydra|FedCM|Token|Session|Status|invalid_credentials|needs_\w+|reset_required|session_invalid|temporarily_unavailable)\b|_/;
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) assert.doesNotMatch(catalog[key]!, TECH, `${name}:${key}`);
+    }
   });
 });
