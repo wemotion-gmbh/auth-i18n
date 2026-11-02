@@ -682,7 +682,7 @@ describe("settings overview: texts inside the rows and the page heading", () => 
   });
 });
 
-describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 §7.3, §7.4, §12, F1, F3)", () => {
+describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 §7.3, §7.4, §12, F1, F2, F3)", () => {
   const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
   // Texts that do not address the user: the same in both forms (plan §12.1 wording).
   const NEUTRAL: Record<string, string> = {
@@ -707,13 +707,17 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     "sso.button.label": "Mit canou anmelden",
     "sso.button.checking": "Wird geprüft…",
     "sso.powered-by.text": "Powered by canou",
+    // F2: the passive sentence under the Google/Microsoft buttons and on the registration page.
+    "sso.privacy.notice.one": "Es gilt die {policy}.",
+    "sso.privacy.notice.other": "Es gelten die Datenschutzerklärungen von {policies}.",
   };
-  // Texts that address the user: a real translation per form. Sie wording from the plan.
+  // Texts that address the user: a real translation per form. Sie wording from the plan where it
+  // has a text (§7.3, §7.4, §12.1, §12.4), the others new in the same style.
   const SIE: Record<string, string> = {
     "sso.account.link.text":
       "Für {email} gibt es bereits ein Konto, zum Beispiel aus der canou-App oder der bisherigen Plattform. Bitte bestätigen Sie einmalig mit dem Passwort dieses Kontos, dass es Ihnen gehört. Danach ist es mit Ihrer Anmeldung verbunden.",
     "sso.account.link.password": "Passwort Ihres bestehenden Kontos",
-    "sso.account.link.reset-sent": "Wir haben Ihnen eine E-Mail geschickt, mit der Sie Ihr Passwort zurücksetzen können.",
+    "sso.account.link.reset-sent": "Wir haben Ihnen eine E-Mail geschickt.",
     "sso.account.error.locked.one":
       "Zu viele Versuche. Bitte versuchen Sie es in einer Minute noch einmal oder setzen Sie das Passwort zurück.",
     "sso.account.error.locked.other":
@@ -751,11 +755,13 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     "sso.account.register.consent.one": ["policy"],
     "sso.account.register.consent.other": ["policies"],
     "sso.announce.signed-in": ["name"],
+    "sso.privacy.notice.one": ["policy"],
+    "sso.privacy.notice.other": ["policies"],
   };
-  /** Builds the consent sentence the way a consumer does (links as plain names here). */
-  const consent = (catalog: Record<string, string>, names: string[]) => {
+  /** Builds a sentence with policy links the way a consumer does (links as plain names here). */
+  const withPolicies = (catalog: Record<string, string>, base: string, names: string[]) => {
     const category = new Intl.PluralRules("de").select(names.length);
-    const template = catalog[`sso.account.register.consent.${category}`]!;
+    const template = catalog[`${base}.${category}`]!;
     const and = ` ${catalog["sso.account.register.consent.and"]} `;
     const list = names.length > 1 ? `${names.slice(0, -1).join(", ")}${and}${names.at(-1)}` : names[0];
     return interpolate(template, { policy: catalog["sso.account.register.consent.policy"], policies: list });
@@ -800,13 +806,13 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
 
   it("has plural pairs: .one without a number placeholder, .other with it (ICU/CLDR categories one/other)", () => {
     const plural = NEW_KEYS.filter((key) => /\.(one|other)$/.test(key));
-    assert.equal(plural.length, 8);
+    assert.equal(plural.length, 10);
     for (const key of plural) {
       const base = key.replace(/\.(one|other)$/, "");
       assert.ok(NEW_KEYS.includes(`${base}.one`) && NEW_KEYS.includes(`${base}.other`), base);
     }
     for (const [name, catalog] of Object.entries(catalogs)) {
-      for (const key of plural.filter((k) => k.endsWith(".one") && !k.includes(".consent."))) {
+      for (const key of plural.filter((k) => k.endsWith(".one"))) {
         assert.doesNotMatch(catalog[key]!, /\{(count|minutes)\}|\d/, `${name}:${key}`);
       }
     }
@@ -814,15 +820,31 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
 
   it("builds the consent sentence of F1: one policy singular, two or more plural with every name", () => {
     for (const [name, catalog] of Object.entries(catalogs)) {
-      assert.equal(consent(catalog, ["canou"]), "Ich habe die Datenschutzerklärung gelesen und akzeptiere diese.", name);
+      assert.equal(withPolicies(catalog, "sso.account.register.consent", ["canou"]), "Ich habe die Datenschutzerklärung gelesen und akzeptiere diese.", name);
       assert.equal(
-        consent(catalog, ["Leinerstift", "canou"]),
+        withPolicies(catalog, "sso.account.register.consent", ["Leinerstift", "canou"]),
         "Ich habe die Datenschutzerklärungen von Leinerstift und canou gelesen und akzeptiere diese.",
         name,
       );
       assert.equal(
-        consent(catalog, ["Leinerstift", "Diakonie", "canou"]),
+        withPolicies(catalog, "sso.account.register.consent", ["Leinerstift", "Diakonie", "canou"]),
         "Ich habe die Datenschutzerklärungen von Leinerstift, Diakonie und canou gelesen und akzeptiere diese.",
+        name,
+      );
+    }
+  });
+
+  it("builds the passive privacy sentence of F2 with the same links: one policy singular, two or more plural", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.equal(withPolicies(catalog, "sso.privacy.notice", ["canou"]), "Es gilt die Datenschutzerklärung.", name);
+      assert.equal(
+        withPolicies(catalog, "sso.privacy.notice", ["Leinerstift", "canou"]),
+        "Es gelten die Datenschutzerklärungen von Leinerstift und canou.",
+        name,
+      );
+      assert.equal(
+        withPolicies(catalog, "sso.privacy.notice", ["Leinerstift", "Diakonie", "canou"]),
+        "Es gelten die Datenschutzerklärungen von Leinerstift, Diakonie und canou.",
         name,
       );
     }

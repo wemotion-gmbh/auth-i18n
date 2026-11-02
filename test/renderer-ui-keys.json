@@ -258,6 +258,8 @@
     "sso.button.unavailable",
     "sso.hint.password",
     "sso.powered-by.text",
+    "sso.privacy.notice.one",
+    "sso.privacy.notice.other",
     "verification.button.request-code",
     "verification.done.message",
     "verification.error.failed",
