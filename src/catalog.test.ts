@@ -1230,11 +1230,14 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     }
   });
 
-  it("has fusion's Kratos guard messages (4100001-4100003) in every message catalog, in the catalog's form", () => {
+  it("has fusion's Kratos guard messages (4100001-4100004) in every message catalog, in the catalog's form", () => {
     const catalogsById = { de, "de-sie": deSie, en: readJson<Record<string, string>>("../locales/en.json") };
     for (const [name, catalog] of Object.entries(catalogsById)) {
-      for (const id of ["4100001", "4100002", "4100003"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
+      for (const id of ["4100001", "4100002", "4100003", "4100004"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
     }
+    // 4100004: the settings of a sign-up nobody confirmed yet are frozen; the same sentence as the UI key.
+    assert.equal(deSie["4100004"], uiDeSie["settings.frozen"]);
+    assert.equal(de["4100004"], uiDe["settings.frozen"]);
     // The button the message names is the label kratos-flow links to the address change with.
     assert.ok(deSie["4100001"]!.includes(`„${uiDeSie["email-change.open"]}“`));
     assert.ok(de["4100001"]!.includes(`„${uiDe["email-change.open"]}“`));
