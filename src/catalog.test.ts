@@ -1104,7 +1104,8 @@ describe("purpose codes: confirmation, link way, support hints, address change (
   const KRATOS_FLOW_KEYS = NEW_KEYS.filter(
     (key) =>
       !key.startsWith("confirm.link.") &&
-      !["confirm.done", "confirm.done-app", "confirm.continue", "settings.frozen", "login.passkey-unknown", "session.relinked"].includes(key) &&
+      // confirm.cleaned: after the cleanup the login is signed out; the sign-in host shows it, not the account step.
+      !["confirm.done", "confirm.done-app", "confirm.continue", "confirm.cleaned", "settings.frozen", "login.passkey-unknown", "session.relinked"].includes(key) &&
       !(key.startsWith("email-change.") && key !== "email-change.elsewhere" && key !== "email-change.open"),
   ).concat(["confirm.link.other-login"]);
 

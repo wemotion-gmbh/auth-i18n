@@ -5,7 +5,6 @@
     "card.footer.select-another-method",
     "card.header.parts.webauthn",
     "confirm.busy",
-    "confirm.cleaned",
     "confirm.code.hint",
     "confirm.code.label",
     "confirm.code.submit",
