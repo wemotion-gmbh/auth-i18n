@@ -33,7 +33,7 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "confirm.other-method": "Andere Anmeldeart wählen",
     "confirm.link.action.signup": "E-Mail-Adresse bestätigen",
     "confirm.link.action.email-change": "Neue Adresse bestätigen",
-    "confirm.link.action.email-change-old": "Bisherige Adresse bestätigen",
+    "confirm.link.action.email-change-old": "Änderung bestätigen",
     "confirm.link.action.account-link": "Konto verbinden",
     "confirm.link.reveal": "Code anzeigen",
     "confirm.link.copy": "Code kopieren",
@@ -60,6 +60,7 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "confirm.sent": "Wir haben Ihnen einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
     "confirm.sent-untimed": "Wir haben Ihnen einen Link an {email} geschickt. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
     "confirm.waiting": "Wir warten auf Ihre Bestätigung…",
+    "confirm.pending": "Ihre Bestätigung ist angekommen. Wir schließen Ihre Anmeldung gerade ab, das kann einen Moment dauern.",
     "confirm.code.hint": "Hat sich der Link in einer anderen App oder auf einem anderen Gerät geöffnet? Dann zeigt er Ihnen einen Code. Geben Sie ihn hier ein.",
     "confirm.resent": "Wir haben Ihnen einen neuen Link geschickt. Der vorige gilt nicht mehr.",
     "confirm.open-elsewhere": "Wir haben den Link schon an {email} geschickt. Öffnen Sie ihn auf dem Gerät, auf dem Sie ihn angefordert haben, oder lassen Sie sich einen Link für dieses Gerät senden.",
@@ -92,7 +93,6 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "sso.account.link.note": "Zu Ihrer Sicherheit melden wir Sie dabei auf Ihren anderen Geräten ab.",
     "sso.account.link.pending": "Ihre Bestätigung ist angekommen. Wir verbinden Ihr Konto gerade, das kann einen Moment dauern.",
     "sso.account.link.support": "Dieses Konto können wir nicht automatisch verbinden. Bitte wenden Sie sich an {support}.",
-    "sso.account.link.hint.address-changed": "Die E-Mail-Adresse Ihres canou-Logins wurde vor Kurzem geändert. Deshalb können wir das Konto nicht automatisch verbinden. Bitte wenden Sie sich an {support}.",
     "sso.account.verify.code-text": "Bitte melden Sie sich einmal mit einem Code per E-Mail an. Damit bestätigen Sie, dass die Adresse Ihnen gehört.",
     "email-change.intro": "Ihre bisherige Adresse bleibt gültig, bis Sie die neue bestätigt haben.",
     "email-change.elsewhere": "Ihre Anmelde-Adresse ändern Sie in Ihrem canou-Konto. Die bisherige Adresse bleibt gültig, bis Sie die neue bestätigt haben.",
@@ -114,6 +114,7 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "confirm.sent": "Wir haben dir einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
     "confirm.sent-untimed": "Wir haben dir einen Link an {email} geschickt. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
     "confirm.waiting": "Wir warten auf deine Bestätigung…",
+    "confirm.pending": "Deine Bestätigung ist angekommen. Wir schließen deine Anmeldung gerade ab, das kann einen Moment dauern.",
     "confirm.code.hint": "Hat sich der Link in einer anderen App oder auf einem anderen Gerät geöffnet? Dann zeigt er dir einen Code. Gib ihn hier ein.",
     "confirm.resent": "Wir haben dir einen neuen Link geschickt. Der vorige gilt nicht mehr.",
     "confirm.open-elsewhere": "Wir haben den Link schon an {email} geschickt. Öffne ihn auf dem Gerät, auf dem du ihn angefordert hast, oder lass dir einen Link für dieses Gerät senden.",
@@ -146,7 +147,6 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "sso.account.link.note": "Zu deiner Sicherheit melden wir dich dabei auf deinen anderen Geräten ab.",
     "sso.account.link.pending": "Deine Bestätigung ist angekommen. Wir verbinden dein Konto gerade, das kann einen Moment dauern.",
     "sso.account.link.support": "Dieses Konto können wir nicht automatisch verbinden. Bitte wende dich an {support}.",
-    "sso.account.link.hint.address-changed": "Die E-Mail-Adresse deines canou-Logins wurde vor Kurzem geändert. Deshalb können wir das Konto nicht automatisch verbinden. Bitte wende dich an {support}.",
     "sso.account.verify.code-text": "Bitte melde dich einmal mit einem Code per E-Mail an. Damit bestätigst du, dass die Adresse dir gehört.",
     "email-change.intro": "Deine bisherige Adresse bleibt gültig, bis du die neue bestätigt hast.",
     "email-change.elsewhere": "Deine Anmelde-Adresse änderst du in deinem canou-Konto. Die bisherige Adresse bleibt gültig, bis du die neue bestätigt hast.",
@@ -1090,7 +1090,6 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     "confirm.continue": ["portal"],
     "sso.account.link.code.text": ["email"],
     "sso.account.link.support": ["support"],
-    "sso.account.link.hint.address-changed": ["support"],
     "email-change.old.text": ["email"],
     "email-change.old.sent": ["email", "time"],
     "email-change.new.sent": ["email", "time"],
@@ -1216,7 +1215,7 @@ describe("purpose codes: confirmation, link way, support hints, address change (
   it("names the support only through {support}, which the consumer fills (site, support contact or „den Support“)", () => {
     for (const [name, catalog] of Object.entries(catalogs)) {
       assert.equal(catalog["sso.account.support.default"], "den Support", name);
-      for (const key of ["sso.account.link.support", "sso.account.link.hint.address-changed", "email-change.no-access", "email-change.blocked"]) {
+      for (const key of ["sso.account.link.support", "email-change.no-access", "email-change.blocked"]) {
         assert.match(catalog[key]!, /an \{support\}\.$/, `${name}:${key}`);
         assert.doesNotMatch(catalog[key]!, /\bSupport\b/, `${name}:${key}`);
       }
@@ -1231,10 +1230,10 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     }
   });
 
-  it("has fusion's Kratos guard messages (4100001-4100004) in every message catalog, in the catalog's form", () => {
+  it("has fusion's Kratos guard messages (4100001-4100005) in every message catalog, in the catalog's form", () => {
     const catalogsById = { de, "de-sie": deSie, en: readJson<Record<string, string>>("../locales/en.json") };
     for (const [name, catalog] of Object.entries(catalogsById)) {
-      for (const id of ["4100001", "4100002", "4100003", "4100004"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
+      for (const id of ["4100001", "4100002", "4100003", "4100004", "4100005"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
     }
     // 4100004: the settings of a sign-up nobody confirmed yet are frozen; the same sentence as the UI key.
     assert.equal(deSie["4100004"], uiDeSie["settings.frozen"]);
@@ -1244,5 +1243,8 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.ok(de["4100001"]!.includes(`„${uiDe["email-change.open"]}“`));
     assert.ok(SIE_FORM.test(deSie["4100001"]!) && DU_PRONOUN.test(de["4100001"]!));
     assert.match(deSie["4100002"]!, /Code per E-Mail/);
+    // 4100005: a clean login changes a first factor (a new sign-in method or the password) without a confirmed link.
+    assert.ok(SIE_FORM.test(deSie["4100005"]!) && DU_PRONOUN.test(de["4100005"]!) && !SIE_FORM.test(de["4100005"]!));
+    for (const catalog of [deSie, de]) assert.match(catalog["4100005"]!, /Anmeldeart .*per Link bestätigen\./);
   });
 });
