@@ -158,7 +158,7 @@
   "4100002": "Die Registrierung mit Passwort ist gerade nicht möglich. Bitte registriere dich mit einem Code per E-Mail.",
   "4100003": "Das hat gerade nicht geklappt. Bitte versuch es in ein paar Minuten noch einmal.",
   "4100004": "Bitte bestätige zuerst deine E-Mail-Adresse.",
-  "4100005": "Eine neue Anmeldeart musst du zuerst per Link bestätigen.",
+  "4100005": "Eine Anmeldeart hinzufügen oder ändern kannst du erst, wenn du das per Link bestätigt hast.",
   "5000001": "{reason}",
   "5000002": "Es sind keine Authentifizierungsmethoden verfügbar. Bitte wende dich an die Systemadministration.",
   "5000003": "Deine Organisation erfordert eine SSO-Anmeldung, aber es ist kein SSO-Anbieter konfiguriert. Bitte wende dich an die Systemadministration."

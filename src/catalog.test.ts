@@ -1245,6 +1245,63 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.match(deSie["4100002"]!, /Code per E-Mail/);
     // 4100005: a clean login changes a first factor (a new sign-in method or the password) without a confirmed link.
     assert.ok(SIE_FORM.test(deSie["4100005"]!) && DU_PRONOUN.test(de["4100005"]!) && !SIE_FORM.test(de["4100005"]!));
-    for (const catalog of [deSie, de]) assert.match(catalog["4100005"]!, /Anmeldeart .*per Link bestätigen\./);
+    for (const catalog of [deSie, de]) assert.match(catalog["4100005"]!, /Anmeldeart hinzufügen oder ändern .*per Link bestätigt/);
+  });
+});
+
+describe("credential_add: link before adding or changing a first factor (0.3.0)", () => {
+  const SIE_TEXTS: Record<string, string> = {
+    "confirm.link.action.credential-add": "Änderung bestätigen",
+    "credential-add.hint": "Bevor Sie eine Anmeldeart hinzufügen oder ändern, bestätigen Sie bitte per Link, dass Sie das sind. Wir schicken ihn an Ihre E-Mail-Adresse.",
+    "credential-add.send": "Link senden",
+    "credential-add.sent": "Wir haben Ihnen einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann können Sie Ihre Änderung gleich abschließen.",
+    "credential-add.sent-untimed": "Wir haben Ihnen einen Link an {email} geschickt. Öffnen Sie ihn in diesem Browser, dann können Sie Ihre Änderung gleich abschließen.",
+    "credential-add.confirmed": "Bestätigt. Sie können Ihre Änderung jetzt abschließen.",
+    "credential-add.expired": "Der Link ist abgelaufen oder wurde durch einen neueren ersetzt. Ihre Änderung wurde nicht gespeichert. Fordern Sie bitte einen neuen Link an.",
+    "credential-add.failed": "Wir konnten die Bestätigung gerade nicht abschließen. Bitte versuchen Sie es noch einmal.",
+  };
+  const DU_TEXTS: Record<string, string> = {
+    "confirm.link.action.credential-add": "Änderung bestätigen",
+    "credential-add.hint": "Bevor du eine Anmeldeart hinzufügst oder änderst, bestätige bitte per Link, dass du das bist. Wir schicken ihn an deine E-Mail-Adresse.",
+    "credential-add.send": "Link senden",
+    "credential-add.sent": "Wir haben dir einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann kannst du deine Änderung gleich abschließen.",
+    "credential-add.sent-untimed": "Wir haben dir einen Link an {email} geschickt. Öffne ihn in diesem Browser, dann kannst du deine Änderung gleich abschließen.",
+    "credential-add.confirmed": "Bestätigt. Du kannst deine Änderung jetzt abschließen.",
+    "credential-add.expired": "Der Link ist abgelaufen oder wurde durch einen neueren ersetzt. Deine Änderung wurde nicht gespeichert. Fordere bitte einen neuen Link an.",
+    "credential-add.failed": "Wir konnten die Bestätigung gerade nicht abschließen. Bitte versuche es noch einmal.",
+  };
+  const PLACEHOLDERS: Record<string, string[]> = {
+    "credential-add.sent": ["email", "time"],
+    "credential-add.sent-untimed": ["email"],
+  };
+
+  it("has the keys in both forms, the wording pinned, and no other credential-add key", () => {
+    for (const [key, text] of Object.entries(SIE_TEXTS)) assert.equal(uiDeSie[key], text, key);
+    for (const [key, text] of Object.entries(DU_TEXTS)) assert.equal(uiDe[key], text, key);
+    for (const catalog of [uiDeSie, uiDe]) {
+      assert.deepEqual(Object.keys(catalog).filter((k) => k.startsWith("credential-add.")).sort(), Object.keys(SIE_TEXTS).filter((k) => k.startsWith("credential-add.")).sort());
+    }
+  });
+
+  it("uses the placeholders per key and the catalog's form of address", () => {
+    for (const key of Object.keys(SIE_TEXTS)) {
+      assert.deepEqual(placeholders(uiDeSie[key]!), PLACEHOLDERS[key] ?? [], key);
+      assert.deepEqual(placeholders(uiDe[key]!), PLACEHOLDERS[key] ?? [], key);
+    }
+    assert.deepEqual(duFormHits(Object.fromEntries(Object.keys(SIE_TEXTS).map((k) => [k, uiDeSie[k]!]))), []);
+    assert.deepEqual(sieFormHits(Object.fromEntries(Object.keys(DU_TEXTS).map((k) => [k, uiDe[k]!]))), []);
+  });
+
+  it("names a link, never a code, and the sent texts say in which browser to open it", () => {
+    for (const catalog of [uiDeSie, uiDe]) {
+      for (const key of ["credential-add.hint", "credential-add.send", "credential-add.sent", "credential-add.sent-untimed", "credential-add.expired"]) {
+        assert.match(catalog[key]!, /Link/, key);
+        assert.doesNotMatch(catalog[key]!, /Code/, key);
+      }
+      for (const key of ["credential-add.sent", "credential-add.sent-untimed"]) assert.match(catalog[key]!, /einen Link an \{email\} geschickt\./, key);
+      assert.match(catalog["credential-add.sent"]!, /Er gilt bis \{time\} Uhr\./);
+      for (const key of ["credential-add.sent", "credential-add.sent-untimed"]) assert.match(catalog[key]!, /in diesem Browser/, key);
+      assert.equal(catalog["credential-add.send"], catalog["email-change.send"]);
+    }
   });
 });
