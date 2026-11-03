@@ -13,6 +13,155 @@ const uiDeSie = readJson<Record<string, string>>("../locales/ui.de-sie.json");
 const kratosIds = readJson<{ kratosVersion: string; ids: Record<string, string> }>("../test/kratos-ids-v26.2.0.json");
 const rendererKeys = readJson<{ keys: string[] }>("../test/renderer-ui-keys.json").keys;
 
+/**
+ * The purpose-code texts (0.3.0): the confirmation after a sign-up with an unconfirmed
+ * address, the link page, the link way of the account step, the support hints and the
+ * address change dialog. `neutral` texts address no one and are the same in both forms;
+ * `sie` and `du` are pinned word for word.
+ */
+const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, string>; du: Record<string, string> } = {
+  neutral: {
+    "confirm.method.password": "einem Passwort",
+    "confirm.method.passkey": "einem Passkey",
+    "confirm.method.webauthn": "einem Sicherheitsschlüssel",
+    "confirm.method.unknown": "einer anderen Anmeldeart",
+    "confirm.code.label": "Code von der Bestätigungsseite",
+    "confirm.code.submit": "Bestätigen",
+    "confirm.resend": "Neuen Link senden",
+    "confirm.send-here": "Link für dieses Gerät senden",
+    "confirm.use-code-login": "Stattdessen mit Code per E-Mail anmelden",
+    "confirm.other-method": "Andere Anmeldeart wählen",
+    "confirm.link.action.signup": "E-Mail-Adresse bestätigen",
+    "confirm.link.action.email-change": "Neue Adresse bestätigen",
+    "confirm.link.action.email-change-old": "Änderung bestätigen",
+    "confirm.link.action.account-link": "Konto verbinden",
+    "confirm.link.reveal": "Code anzeigen",
+    "confirm.link.copy": "Code kopieren",
+    "confirm.link.copied": "Code kopiert",
+    "confirm.link.invalid": "Dieser Link ist abgelaufen oder wurde durch einen neueren ersetzt.",
+    "confirm.continue": "Weiter zu {portal}",
+    "sso.account.link.code.send": "Link senden",
+    "sso.account.link.use-password": "Stattdessen mit Passwort verbinden",
+    "sso.account.link.use-code": "Stattdessen per Link verbinden",
+    "sso.account.support.default": "den Support",
+    "sso.account.verify.code-button": "Mit Code per E-Mail anmelden",
+    "email-change.title": "E-Mail-Adresse ändern",
+    "email-change.open": "E-Mail-Adresse ändern",
+    "email-change.send": "Link senden",
+    "email-change.cancel": "Änderung abbrechen",
+    "email-change.in-use": "Diese Adresse gehört schon zu einem anderen Konto.",
+    "email-change.taken": "Diese Adresse ist inzwischen vergeben.",
+  },
+  sie: {
+    "confirm.signup.title": "Bitte bestätigen Sie Ihre E-Mail-Adresse",
+    "confirm.signup.signed-in-now": "Sie haben sich gerade in diesem Browser mit {method} angemeldet.",
+    "confirm.signup.signed-in.one": "Sie haben sich vor einer Minute in diesem Browser mit {method} angemeldet.",
+    "confirm.signup.signed-in.other": "Sie haben sich vor {minutes} Minuten in diesem Browser mit {method} angemeldet.",
+    "confirm.sent": "Wir haben Ihnen einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "confirm.sent-untimed": "Wir haben Ihnen einen Link an {email} geschickt. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "confirm.waiting": "Wir warten auf Ihre Bestätigung…",
+    "confirm.pending": "Ihre Bestätigung ist angekommen. Wir schließen Ihre Anmeldung gerade ab, das kann einen Moment dauern.",
+    "confirm.code.hint": "Hat sich der Link in einer anderen App oder auf einem anderen Gerät geöffnet? Dann zeigt er Ihnen einen Code. Geben Sie ihn hier ein.",
+    "confirm.resent": "Wir haben Ihnen einen neuen Link geschickt. Der vorige gilt nicht mehr.",
+    "confirm.open-elsewhere": "Wir haben den Link schon an {email} geschickt. Öffnen Sie ihn auf dem Gerät, auf dem Sie ihn angefordert haben, oder lassen Sie sich einen Link für dieses Gerät senden.",
+    "confirm.resend-wait.one": "Einen neuen Link können Sie in einer Minute anfordern.",
+    "confirm.resend-wait.other": "Einen neuen Link können Sie in {minutes} Minuten anfordern.",
+    "confirm.too-many": "Sie haben schon mehrere Links angefordert. Bitte sehen Sie in Ihrem Postfach nach, auch im Spam-Ordner.",
+    "confirm.refused-limit": "Für diese Adresse können wir gerade keinen Link senden. Melden Sie sich stattdessen mit einem Code per E-Mail an.",
+    "confirm.expired": "Die Anmeldung wurde nicht rechtzeitig bestätigt und ist entfernt. Bitte melden Sie sich noch einmal an.",
+    "confirm.expired-registration": "Ihre Registrierung wurde nicht rechtzeitig bestätigt und ist entfernt. Bitte registrieren Sie sich noch einmal.",
+    "confirm.cleaned": "Eine nicht bestätigte Anmeldung mit {method} haben wir entfernt. Bitte melden Sie sich noch einmal an. Waren Sie das selbst, richten Sie diese Anmeldeart danach wieder ein.",
+    "confirm.busy": "Wir räumen Ihr Konto gerade auf. Bitte versuchen Sie es in einer Minute noch einmal.",
+    "confirm.locked": "Zu viele falsche Eingaben. Fordern Sie bitte einen neuen Link an.",
+    "confirm.link-expired": "Der Link ist abgelaufen oder wurde durch einen neueren ersetzt. Fordern Sie bitte einen neuen an.",
+    "confirm.mail-failed": "Wir konnten die E-Mail gerade nicht senden. Bitte versuchen Sie es in ein paar Minuten noch einmal.",
+    "confirm.link.bound": "Bitte bestätigen Sie mit einem Klick.",
+    "confirm.link.other-login": "Melden Sie sich mit dem Konto an, für das Sie das angefordert haben.",
+    "confirm.link.unbound": "Geben Sie diesen Code in dem Browser ein, in dem Sie das angefordert haben. Waren Sie das nicht, ignorieren Sie diese Mail und geben Sie den Code an niemanden weiter.",
+    "confirm.link.unbound-app": "Geben Sie diesen Code in der App ein, in der Sie das angefordert haben. Waren Sie das nicht, ignorieren Sie diese Mail und geben Sie den Code an niemanden weiter.",
+    "confirm.link.code-label": "Ihr Code",
+    "confirm.link.reveal-limit": "Dieser Code wurde schon zu oft angezeigt. Fordern Sie im angemeldeten Browser einen neuen Link an.",
+    "confirm.link.incomplete": "Dieser Link ist unvollständig. Fordern Sie im angemeldeten Browser einen neuen an.",
+    "confirm.link.expired-signup": "Die Anmeldung wurde nicht rechtzeitig bestätigt und ist entfernt. Melden Sie sich bei {portal} noch einmal an.",
+    "confirm.done": "Bestätigt. Sie können zum ursprünglichen Fenster zurückkehren, es geht dort von selbst weiter.",
+    "confirm.done-app": "Bestätigt. Gehen Sie zurück in die App.",
+    "settings.frozen": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+    "login.code.too-many": "Der Code wurde zu oft falsch eingegeben. Bitte fordern Sie einen neuen Code an.",
+    "login.passkey-unknown": "Diesen Passkey kennen wir nicht mehr. Bitte melden Sie sich mit einem Code per E-Mail an.",
+    "session.relinked": "Ihr Konto wurde verbunden. Bitte melden Sie sich noch einmal an.",
+    "sso.account.link.code.text": "Für {email} gibt es bereits ein Konto, zum Beispiel aus der canou-App oder der bisherigen Plattform. Wir schicken Ihnen einen Link an diese Adresse. Damit bestätigen Sie einmalig, dass das Konto Ihnen gehört. Danach ist es mit Ihrer Anmeldung verbunden.",
+    "sso.account.link.note": "Zu Ihrer Sicherheit melden wir Sie dabei auf Ihren anderen Geräten ab.",
+    "sso.account.link.pending": "Ihre Bestätigung ist angekommen. Wir verbinden Ihr Konto gerade, das kann einen Moment dauern.",
+    "sso.account.link.support": "Dieses Konto können wir nicht automatisch verbinden. Bitte wenden Sie sich an {support}.",
+    "sso.account.verify.code-text": "Bitte melden Sie sich einmal mit einem Code per E-Mail an. Damit bestätigen Sie, dass die Adresse Ihnen gehört.",
+    "email-change.intro": "Ihre bisherige Adresse bleibt gültig, bis Sie die neue bestätigt haben.",
+    "email-change.elsewhere": "Ihre Anmelde-Adresse ändern Sie in Ihrem canou-Konto. Die bisherige Adresse bleibt gültig, bis Sie die neue bestätigt haben.",
+    "email-change.old.text": "Zuerst bestätigen Sie, dass Sie Ihre bisherige Adresse {email} noch nutzen. Wir schicken Ihnen dorthin einen Link.",
+    "email-change.old.sent": "Wir haben Ihnen einen Link an Ihre bisherige Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "email-change.new.sent": "Wir haben Ihnen einen Link an die neue Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "email-change.pending": "Sie haben die Änderung auf {email} angefordert.",
+    "email-change.cancelled": "Die Änderung ist abgebrochen. Ihre Anmelde-Adresse bleibt {email}.",
+    "email-change.no-access": "Kein Zugriff mehr auf Ihre bisherige Adresse? Wenden Sie sich an {support}.",
+    "email-change.same": "Das ist schon Ihre Anmelde-Adresse.",
+    "email-change.done": "Ihre Anmelde-Adresse ist jetzt {email}.",
+    "email-change.blocked": "Ihre Anmelde-Adresse lässt sich hier gerade nicht ändern. Bitte wenden Sie sich an {support}.",
+  },
+  du: {
+    "confirm.signup.title": "Bitte bestätige deine E-Mail-Adresse",
+    "confirm.signup.signed-in-now": "Du hast dich gerade in diesem Browser mit {method} angemeldet.",
+    "confirm.signup.signed-in.one": "Du hast dich vor einer Minute in diesem Browser mit {method} angemeldet.",
+    "confirm.signup.signed-in.other": "Du hast dich vor {minutes} Minuten in diesem Browser mit {method} angemeldet.",
+    "confirm.sent": "Wir haben dir einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "confirm.sent-untimed": "Wir haben dir einen Link an {email} geschickt. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "confirm.waiting": "Wir warten auf deine Bestätigung…",
+    "confirm.pending": "Deine Bestätigung ist angekommen. Wir schließen deine Anmeldung gerade ab, das kann einen Moment dauern.",
+    "confirm.code.hint": "Hat sich der Link in einer anderen App oder auf einem anderen Gerät geöffnet? Dann zeigt er dir einen Code. Gib ihn hier ein.",
+    "confirm.resent": "Wir haben dir einen neuen Link geschickt. Der vorige gilt nicht mehr.",
+    "confirm.open-elsewhere": "Wir haben den Link schon an {email} geschickt. Öffne ihn auf dem Gerät, auf dem du ihn angefordert hast, oder lass dir einen Link für dieses Gerät senden.",
+    "confirm.resend-wait.one": "Einen neuen Link kannst du in einer Minute anfordern.",
+    "confirm.resend-wait.other": "Einen neuen Link kannst du in {minutes} Minuten anfordern.",
+    "confirm.too-many": "Du hast schon mehrere Links angefordert. Bitte sieh in deinem Postfach nach, auch im Spam-Ordner.",
+    "confirm.refused-limit": "Für diese Adresse können wir gerade keinen Link senden. Melde dich stattdessen mit einem Code per E-Mail an.",
+    "confirm.expired": "Die Anmeldung wurde nicht rechtzeitig bestätigt und ist entfernt. Bitte melde dich noch einmal an.",
+    "confirm.expired-registration": "Deine Registrierung wurde nicht rechtzeitig bestätigt und ist entfernt. Bitte registriere dich noch einmal.",
+    "confirm.cleaned": "Eine nicht bestätigte Anmeldung mit {method} haben wir entfernt. Bitte melde dich noch einmal an. Warst du das selbst, richte diese Anmeldeart danach wieder ein.",
+    "confirm.busy": "Wir räumen dein Konto gerade auf. Bitte versuch es in einer Minute noch einmal.",
+    "confirm.locked": "Zu viele falsche Eingaben. Fordere bitte einen neuen Link an.",
+    "confirm.link-expired": "Der Link ist abgelaufen oder wurde durch einen neueren ersetzt. Fordere bitte einen neuen an.",
+    "confirm.mail-failed": "Wir konnten die E-Mail gerade nicht senden. Bitte versuch es in ein paar Minuten noch einmal.",
+    "confirm.link.bound": "Bitte bestätige mit einem Klick.",
+    "confirm.link.other-login": "Melde dich mit dem Konto an, für das du das angefordert hast.",
+    "confirm.link.unbound": "Gib diesen Code in dem Browser ein, in dem du das angefordert hast. Warst du das nicht, ignoriere diese Mail und gib den Code an niemanden weiter.",
+    "confirm.link.unbound-app": "Gib diesen Code in der App ein, in der du das angefordert hast. Warst du das nicht, ignoriere diese Mail und gib den Code an niemanden weiter.",
+    "confirm.link.code-label": "Dein Code",
+    "confirm.link.reveal-limit": "Dieser Code wurde schon zu oft angezeigt. Fordere im angemeldeten Browser einen neuen Link an.",
+    "confirm.link.incomplete": "Dieser Link ist unvollständig. Fordere im angemeldeten Browser einen neuen an.",
+    "confirm.link.expired-signup": "Die Anmeldung wurde nicht rechtzeitig bestätigt und ist entfernt. Melde dich bei {portal} noch einmal an.",
+    "confirm.done": "Bestätigt. Du kannst zum ursprünglichen Fenster zurückkehren, es geht dort von selbst weiter.",
+    "confirm.done-app": "Bestätigt. Geh zurück in die App.",
+    "settings.frozen": "Bitte bestätige zuerst deine E-Mail-Adresse.",
+    "login.code.too-many": "Der Code wurde zu oft falsch eingegeben. Bitte fordere einen neuen Code an.",
+    "login.passkey-unknown": "Diesen Passkey kennen wir nicht mehr. Bitte melde dich mit einem Code per E-Mail an.",
+    "session.relinked": "Dein Konto wurde verbunden. Bitte melde dich noch einmal an.",
+    "sso.account.link.code.text": "Für {email} gibt es bereits ein Konto, zum Beispiel aus der canou-App oder der bisherigen Plattform. Wir schicken dir einen Link an diese Adresse. Damit bestätigst du einmalig, dass das Konto dir gehört. Danach ist es mit deiner Anmeldung verbunden.",
+    "sso.account.link.note": "Zu deiner Sicherheit melden wir dich dabei auf deinen anderen Geräten ab.",
+    "sso.account.link.pending": "Deine Bestätigung ist angekommen. Wir verbinden dein Konto gerade, das kann einen Moment dauern.",
+    "sso.account.link.support": "Dieses Konto können wir nicht automatisch verbinden. Bitte wende dich an {support}.",
+    "sso.account.verify.code-text": "Bitte melde dich einmal mit einem Code per E-Mail an. Damit bestätigst du, dass die Adresse dir gehört.",
+    "email-change.intro": "Deine bisherige Adresse bleibt gültig, bis du die neue bestätigt hast.",
+    "email-change.elsewhere": "Deine Anmelde-Adresse änderst du in deinem canou-Konto. Die bisherige Adresse bleibt gültig, bis du die neue bestätigt hast.",
+    "email-change.old.text": "Zuerst bestätigst du, dass du deine bisherige Adresse {email} noch nutzt. Wir schicken dir dorthin einen Link.",
+    "email-change.old.sent": "Wir haben dir einen Link an deine bisherige Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "email-change.new.sent": "Wir haben dir einen Link an die neue Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "email-change.pending": "Du hast die Änderung auf {email} angefordert.",
+    "email-change.cancelled": "Die Änderung ist abgebrochen. Deine Anmelde-Adresse bleibt {email}.",
+    "email-change.no-access": "Kein Zugriff mehr auf deine bisherige Adresse? Wende dich an {support}.",
+    "email-change.same": "Das ist schon deine Anmelde-Adresse.",
+    "email-change.done": "Deine Anmelde-Adresse ist jetzt {email}.",
+    "email-change.blocked": "Deine Anmelde-Adresse lässt sich hier gerade nicht ändern. Bitte wende dich an {support}.",
+  },
+};
+
 /** Base IDs (1010000, 4000000, ...) only mark a range in text/id.go; Kratos never sends them. */
 const isBaseId = (id: string) => id.endsWith("0000");
 
@@ -33,10 +182,13 @@ const word = (alternatives: string) => new RegExp(`(?<!\\p{L})(?:${alternatives}
 const DU_PRONOUN = word("du|dich|dir|dein\\p{L}*");
 const DU_IMPERATIVE = word(
   [
-    // "versuch" not after an article: „Noch ein Versuch.“ is the noun (SSO attempts text).
-    "prüf", "gib", "(?<!(?:ein|einen)\\s)versuch", "wähl", "mach", "stell", "klick", "melde", "richte", "ändere",
+    // "versuch" not after an article: "Noch ein Versuch." is the noun (SSO attempts text);
+    // "klick" not after "einem": "mit einem Klick" is the noun (link page).
+    "prüf", "gib", "(?<!(?:ein|einen)\\s)versuch", "wähl", "mach", "stell", "(?<!einem\\s)klick", "melde", "richte", "ändere",
     "bestätige", "bewahre", "schließe", "löse", "starte", "aktualisiere", "lege", "wende",
     "nutze", "füge", "sende", "gehe",
+    // Imperatives of the purpose-code texts (0.3.0).
+    "öffne", "fordere", "lass", "sieh", "geh", "registriere", "ignoriere",
     // -e forms of the stems above. "prüfe" only before a word, because "Prüfe…" is a
     // first-person progress label; "versuche" only before "es", because "Versuche" is
     // also the plural noun ("Zu viele Versuche").
@@ -154,6 +306,14 @@ describe("Sie-form checker", () => {
       "Mache ein Foto.",
       "Stelle sicher, dass alles stimmt.",
       "Klicke auf den Link.",
+      "Klick auf den Link.",
+      "Öffne ihn in diesem Browser.",
+      "Fordere bitte einen neuen Link an.",
+      "Oder lass dir einen Link senden.",
+      "Bitte sieh in deinem Postfach nach.",
+      "Bestätigt. Geh zurück in die App.",
+      "Bitte registriere dich noch einmal.",
+      "Ignoriere diese Mail.",
     ]) {
       assert.ok(DU_IMPERATIVE.test(du), `checker misses: ${du}`);
     }
@@ -163,6 +323,14 @@ describe("Sie-form checker", () => {
       "Bitte versuchen Sie es erneut.",
       "Noch ein Versuch.",
       "Sie haben noch einen Versuch.",
+      "Bitte bestätigen Sie mit einem Klick.",
+      "Öffnen Sie ihn in diesem Browser.",
+      "Fordern Sie bitte einen neuen Link an.",
+      "Oder lassen Sie sich einen Link senden.",
+      "Bitte sehen Sie in Ihrem Postfach nach.",
+      "Bestätigt. Gehen Sie zurück in die App.",
+      "Bitte registrieren Sie sich noch einmal.",
+      "Ignorieren Sie diese Mail.",
     ]) {
       assert.ok(!DU_IMPERATIVE.test(neutral), `false positive: ${neutral}`);
     }
@@ -777,9 +945,10 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     );
     assert.deepEqual(missing, []);
     assert.deepEqual(NEW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
-    // Every sso.* key of the catalogs is covered here (no untested extra key).
+    // Every sso.* key of the catalogs is covered here or in the purpose-code block (0.3.0),
+    // so no key goes untested.
     for (const catalog of Object.values(catalogs)) {
-      assert.deepEqual(Object.keys(catalog).filter((k) => k.startsWith("sso.")).sort(), [...NEW_KEYS].sort());
+      assert.deepEqual(Object.keys(catalog).filter((k) => k.startsWith("sso.") && !(k in PURPOSE_CODE_SPEC.neutral) && !(k in PURPOSE_CODE_SPEC.sie)).sort(), [...NEW_KEYS].sort());
     }
   });
 
@@ -900,6 +1069,239 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     const TECH = /\b(?:SSO|OIDC|OAuth|Kratos|Hydra|FedCM|Token|Session|Status|invalid_credentials|needs_\w+|reset_required|session_invalid|temporarily_unavailable)\b|_/;
     for (const [name, catalog] of Object.entries(catalogs)) {
       for (const key of NEW_KEYS) assert.doesNotMatch(catalog[key]!, TECH, `${name}:${key}`);
+    }
+  });
+});
+
+describe("purpose codes: confirmation, link way, support hints, address change (0.3.0)", () => {
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  const { neutral: NEUTRAL, sie: SIE, du: DU } = PURPOSE_CODE_SPEC;
+  const NEW_KEYS = [...Object.keys(NEUTRAL), ...Object.keys(SIE)];
+  const PLACEHOLDERS: Record<string, string[]> = {
+    "confirm.signup.signed-in-now": ["method"],
+    "confirm.signup.signed-in.one": ["method"],
+    "confirm.signup.signed-in.other": ["method", "minutes"],
+    "confirm.sent": ["email", "time"],
+    "confirm.sent-untimed": ["email"],
+    "confirm.open-elsewhere": ["email"],
+    "confirm.resend-wait.other": ["minutes"],
+    "confirm.cleaned": ["method"],
+    "confirm.link.expired-signup": ["portal"],
+    "confirm.continue": ["portal"],
+    "sso.account.link.code.text": ["email"],
+    "sso.account.link.support": ["support"],
+    "email-change.old.text": ["email"],
+    "email-change.old.sent": ["email", "time"],
+    "email-change.new.sent": ["email", "time"],
+    "email-change.pending": ["email"],
+    "email-change.cancelled": ["email"],
+    "email-change.no-access": ["support"],
+    "email-change.done": ["email"],
+    "email-change.blocked": ["support"],
+  };
+  /** Keys kratos-flow 0.6.0 requires (its `REQUIRED_UI_KEYS`); the others are for canou-auth, the Hub and the app. */
+  const KRATOS_FLOW_KEYS = NEW_KEYS.filter(
+    (key) =>
+      !key.startsWith("confirm.link.") &&
+      // confirm.cleaned: after the cleanup the login is signed out; the sign-in host shows it, not the account step.
+      !["confirm.done", "confirm.done-app", "confirm.continue", "confirm.cleaned", "settings.frozen", "login.passkey-unknown", "session.relinked"].includes(key) &&
+      !(key.startsWith("email-change.") && key !== "email-change.elsewhere" && key !== "email-change.open"),
+  ).concat(["confirm.link.other-login"]);
+
+  it("has every new key in both forms, non-empty, and the kratos-flow keys in the renderer key list", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      NEW_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map((key) => `${name}:${key}`),
+    );
+    assert.deepEqual(missing, []);
+    assert.deepEqual(Object.keys(DU).sort(), Object.keys(SIE).sort());
+    assert.deepEqual(KRATOS_FLOW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
+  });
+
+  it("keeps the wording: neutral texts the same in both forms, Sie and Du word for word", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(NEUTRAL)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+    for (const [key, text] of Object.entries(SIE)) assert.equal(uiDeSie[key], text, key);
+    for (const [key, text] of Object.entries(DU)) assert.equal(uiDe[key], text, key);
+  });
+
+  it("addresses the user in the catalog's form (real translation, not a copy)", () => {
+    for (const key of Object.keys(SIE)) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} has no Sie form`);
+      assert.ok(!DU_PRONOUN.test(uiDeSie[key]!) && !DU_IMPERATIVE.test(uiDeSie[key]!), `ui.de-sie:${key} has a Du form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} has no Du form`);
+      assert.ok(!SIE_FORM.test(uiDe[key]!), `ui.de:${key} has a Sie form`);
+    }
+    for (const key of Object.keys(NEUTRAL)) {
+      assert.ok(!SIE_FORM.test(NEUTRAL[key]!) && !DU_PRONOUN.test(NEUTRAL[key]!), `neutral ${key} addresses the user`);
+    }
+  });
+
+  it("uses only the listed placeholders, the same in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) assert.deepEqual(placeholders(catalog[key]!), PLACEHOLDERS[key] ?? [], `${name}:${key}`);
+    }
+  });
+
+  it("has plural pairs: .one spells the number, .other carries {minutes}", () => {
+    const plural = NEW_KEYS.filter((key) => /\.(one|other)$/.test(key));
+    assert.deepEqual(plural.sort(), ["confirm.resend-wait.one", "confirm.resend-wait.other", "confirm.signup.signed-in.one", "confirm.signup.signed-in.other"]);
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of plural.filter((k) => k.endsWith(".one"))) {
+        assert.doesNotMatch(catalog[key]!, /\{minutes\}|\d/, `${name}:${key}`);
+        assert.match(catalog[key]!, /einer Minute/, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("shows the fixed warning sentence in a foreign browser or app, and never offers to go on there", () => {
+    assert.equal(
+      uiDeSie["confirm.link.unbound"],
+      "Geben Sie diesen Code in dem Browser ein, in dem Sie das angefordert haben. Waren Sie das nicht, ignorieren Sie diese Mail und geben Sie den Code an niemanden weiter.",
+    );
+    assert.equal(
+      uiDe["confirm.link.unbound"],
+      "Gib diesen Code in dem Browser ein, in dem du das angefordert hast. Warst du das nicht, ignoriere diese Mail und gib den Code an niemanden weiter.",
+    );
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of ["confirm.link.unbound", "confirm.link.unbound-app"]) {
+        assert.match(catalog[key]!, /an niemanden weiter\.$/, `${name}:${key}`);
+        assert.doesNotMatch(catalog[key]!, /fortfahren|hier weiter|\{code\}/i, `${name}:${key}`);
+      }
+      assert.match(catalog["confirm.link.unbound-app"]!, /in der App ein/, name);
+    }
+  });
+
+  it("names a link, never a code, for what the e-mail brings, with the time it is valid", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of ["confirm.sent", "email-change.old.sent", "email-change.new.sent"]) {
+        assert.match(catalog[key]!, /einen Link an .*\{email\} geschickt\. Er gilt bis \{time\} Uhr\./, `${name}:${key}`);
+        assert.match(catalog[key]!, /in diesem Browser/, `${name}:${key}`);
+      }
+      for (const key of ["sso.account.link.code.text", "confirm.resent", "confirm.resend", "sso.account.link.code.send", "email-change.send"]) {
+        assert.match(catalog[key]!, /Link/, `${name}:${key}`);
+        assert.doesNotMatch(catalog[key]!, /Code/, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("offers the link way first and the password second in the account step", () => {
+    for (const catalog of Object.values(catalogs)) {
+      assert.equal(catalog["sso.account.link.use-password"], "Stattdessen mit Passwort verbinden");
+      assert.equal(catalog["sso.account.link.use-code"], "Stattdessen per Link verbinden");
+      assert.equal(catalog["sso.account.link.code.send"], "Link senden");
+    }
+    // The ways of the superseded code sign-in (session details) are not in the catalog.
+    for (const catalog of Object.values(catalogs)) {
+      const stale = Object.keys(catalog).filter(
+        (k) => k.startsWith("sso.account.link.method.") || k.startsWith("sso.account.link.hint.sign-in-method") || k === "sso.account.link.hint.ambiguous" || k.startsWith("sso.account.link.code.resend"),
+      );
+      assert.deepEqual(stale, []);
+    }
+  });
+
+  it("reads right with every sign-in name after „mit“ (dative)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const methods = ["confirm.method.password", "confirm.method.passkey", "confirm.method.webauthn", "confirm.method.unknown"].map((k) => catalog[k]!);
+      assert.deepEqual(methods, ["einem Passwort", "einem Passkey", "einem Sicherheitsschlüssel", "einer anderen Anmeldeart"], name);
+      for (const method of [...methods, catalog["oidc.provider.microsoft"]!, catalog["oidc.provider.apple"]!]) {
+        const text = interpolate(catalog["confirm.cleaned"]!, { method });
+        assert.ok(text.includes(`Anmeldung mit ${method} haben wir entfernt.`), `${name}: ${text}`);
+        assert.doesNotMatch(text, /\{|\}/);
+      }
+    }
+  });
+
+  it("names the support only through {support}, which the consumer fills (site, support contact or „den Support“)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.equal(catalog["sso.account.support.default"], "den Support", name);
+      for (const key of ["sso.account.link.support", "email-change.no-access", "email-change.blocked"]) {
+        assert.match(catalog[key]!, /an \{support\}\.$/, `${name}:${key}`);
+        assert.doesNotMatch(catalog[key]!, /\bSupport\b/, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("keeps the old address until the new one is confirmed, and says so in the dialog", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.match(catalog["email-change.intro"]!, /bisherige Adresse bleibt gültig, bis .* die neue bestätigt/, name);
+      assert.match(catalog["email-change.elsewhere"]!, /bisherige Adresse bleibt gültig, bis .* die neue bestätigt/, name);
+      assert.match(catalog["email-change.old.text"]!, /bisherige Adresse \{email\}/, name);
+    }
+  });
+
+  it("has fusion's Kratos guard messages (4100001-4100005) in every message catalog, in the catalog's form", () => {
+    const catalogsById = { de, "de-sie": deSie, en: readJson<Record<string, string>>("../locales/en.json") };
+    for (const [name, catalog] of Object.entries(catalogsById)) {
+      for (const id of ["4100001", "4100002", "4100003", "4100004", "4100005"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
+    }
+    // 4100004: the settings of a sign-up nobody confirmed yet are frozen; the same sentence as the UI key.
+    assert.equal(deSie["4100004"], uiDeSie["settings.frozen"]);
+    assert.equal(de["4100004"], uiDe["settings.frozen"]);
+    // The button the message names is the label kratos-flow links to the address change with.
+    assert.ok(deSie["4100001"]!.includes(`„${uiDeSie["email-change.open"]}“`));
+    assert.ok(de["4100001"]!.includes(`„${uiDe["email-change.open"]}“`));
+    assert.ok(SIE_FORM.test(deSie["4100001"]!) && DU_PRONOUN.test(de["4100001"]!));
+    assert.match(deSie["4100002"]!, /Code per E-Mail/);
+    // 4100005: a clean login changes a first factor (a new sign-in method or the password) without a confirmed link.
+    assert.ok(SIE_FORM.test(deSie["4100005"]!) && DU_PRONOUN.test(de["4100005"]!) && !SIE_FORM.test(de["4100005"]!));
+    for (const catalog of [deSie, de]) assert.match(catalog["4100005"]!, /Anmeldeart hinzufügen oder ändern .*per Link bestätigt/);
+  });
+});
+
+describe("credential_add: link before adding or changing a first factor (0.3.0)", () => {
+  const SIE_TEXTS: Record<string, string> = {
+    "confirm.link.action.credential-add": "Änderung bestätigen",
+    "credential-add.hint": "Bevor Sie eine Anmeldeart hinzufügen oder ändern, bestätigen Sie bitte per Link, dass Sie das sind. Wir schicken ihn an Ihre E-Mail-Adresse.",
+    "credential-add.send": "Link senden",
+    "credential-add.sent": "Wir haben Ihnen einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann können Sie Ihre Änderung gleich abschließen.",
+    "credential-add.sent-untimed": "Wir haben Ihnen einen Link an {email} geschickt. Öffnen Sie ihn in diesem Browser, dann können Sie Ihre Änderung gleich abschließen.",
+    "credential-add.confirmed": "Bestätigt. Sie können Ihre Änderung jetzt abschließen.",
+    "credential-add.expired": "Der Link ist abgelaufen oder wurde durch einen neueren ersetzt. Ihre Änderung wurde nicht gespeichert. Fordern Sie bitte einen neuen Link an.",
+    "credential-add.failed": "Wir konnten die Bestätigung gerade nicht abschließen. Bitte versuchen Sie es noch einmal.",
+  };
+  const DU_TEXTS: Record<string, string> = {
+    "confirm.link.action.credential-add": "Änderung bestätigen",
+    "credential-add.hint": "Bevor du eine Anmeldeart hinzufügst oder änderst, bestätige bitte per Link, dass du das bist. Wir schicken ihn an deine E-Mail-Adresse.",
+    "credential-add.send": "Link senden",
+    "credential-add.sent": "Wir haben dir einen Link an {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann kannst du deine Änderung gleich abschließen.",
+    "credential-add.sent-untimed": "Wir haben dir einen Link an {email} geschickt. Öffne ihn in diesem Browser, dann kannst du deine Änderung gleich abschließen.",
+    "credential-add.confirmed": "Bestätigt. Du kannst deine Änderung jetzt abschließen.",
+    "credential-add.expired": "Der Link ist abgelaufen oder wurde durch einen neueren ersetzt. Deine Änderung wurde nicht gespeichert. Fordere bitte einen neuen Link an.",
+    "credential-add.failed": "Wir konnten die Bestätigung gerade nicht abschließen. Bitte versuche es noch einmal.",
+  };
+  const PLACEHOLDERS: Record<string, string[]> = {
+    "credential-add.sent": ["email", "time"],
+    "credential-add.sent-untimed": ["email"],
+  };
+
+  it("has the keys in both forms, the wording pinned, and no other credential-add key", () => {
+    for (const [key, text] of Object.entries(SIE_TEXTS)) assert.equal(uiDeSie[key], text, key);
+    for (const [key, text] of Object.entries(DU_TEXTS)) assert.equal(uiDe[key], text, key);
+    for (const catalog of [uiDeSie, uiDe]) {
+      assert.deepEqual(Object.keys(catalog).filter((k) => k.startsWith("credential-add.")).sort(), Object.keys(SIE_TEXTS).filter((k) => k.startsWith("credential-add.")).sort());
+    }
+  });
+
+  it("uses the placeholders per key and the catalog's form of address", () => {
+    for (const key of Object.keys(SIE_TEXTS)) {
+      assert.deepEqual(placeholders(uiDeSie[key]!), PLACEHOLDERS[key] ?? [], key);
+      assert.deepEqual(placeholders(uiDe[key]!), PLACEHOLDERS[key] ?? [], key);
+    }
+    assert.deepEqual(duFormHits(Object.fromEntries(Object.keys(SIE_TEXTS).map((k) => [k, uiDeSie[k]!]))), []);
+    assert.deepEqual(sieFormHits(Object.fromEntries(Object.keys(DU_TEXTS).map((k) => [k, uiDe[k]!]))), []);
+  });
+
+  it("names a link, never a code, and the sent texts say in which browser to open it", () => {
+    for (const catalog of [uiDeSie, uiDe]) {
+      for (const key of ["credential-add.hint", "credential-add.send", "credential-add.sent", "credential-add.sent-untimed", "credential-add.expired"]) {
+        assert.match(catalog[key]!, /Link/, key);
+        assert.doesNotMatch(catalog[key]!, /Code/, key);
+      }
+      for (const key of ["credential-add.sent", "credential-add.sent-untimed"]) assert.match(catalog[key]!, /einen Link an \{email\} geschickt\./, key);
+      assert.match(catalog["credential-add.sent"]!, /Er gilt bis \{time\} Uhr\./);
+      for (const key of ["credential-add.sent", "credential-add.sent-untimed"]) assert.match(catalog[key]!, /in diesem Browser/, key);
+      assert.equal(catalog["credential-add.send"], catalog["email-change.send"]);
     }
   });
 });

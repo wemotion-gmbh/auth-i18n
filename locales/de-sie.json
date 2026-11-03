@@ -157,6 +157,11 @@
   "4070004": "Der Bestätigungslink ist unvollständig. Bitte starten Sie den Vorgang erneut.",
   "4070005": "Der Vorgang ist abgelaufen. Bitte versuchen Sie es erneut.",
   "4070006": "Der Bestätigungscode ist ungültig oder wurde bereits verwendet. Bitte versuchen Sie es erneut.",
+  "4100001": "Ihre E-Mail-Adresse ändern Sie über „E-Mail-Adresse ändern“.",
+  "4100002": "Die Registrierung mit Passwort ist gerade nicht möglich. Bitte registrieren Sie sich mit einem Code per E-Mail.",
+  "4100003": "Das hat gerade nicht geklappt. Bitte versuchen Sie es in ein paar Minuten noch einmal.",
+  "4100004": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
+  "4100005": "Eine Anmeldeart hinzufügen oder ändern können Sie erst, wenn Sie das per Link bestätigt haben.",
   "5000001": "Es ist ein unerwarteter Fehler aufgetreten. Bitte versuchen Sie es später erneut.",
   "5000002": "Es sind keine Anmeldemethoden verfügbar. Bitte wenden Sie sich an die Systemadministration.",
   "5000003": "Ihre Organisation verlangt eine SSO-Anmeldung, es ist aber kein SSO-Anbieter eingerichtet. Bitte wenden Sie sich an die Systemadministration."

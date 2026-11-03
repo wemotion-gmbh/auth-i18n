@@ -154,6 +154,11 @@
   "4070003": "Der Bestätigungsvorgang ist fehlgeschlagen und muss erneut versucht werden.",
   "4070005": "Der Vorgang ist abgelaufen. Bitte versuch es erneut.",
   "4070006": "Der Bestätigungscode ist ungültig oder wurde bereits verwendet. Bitte versuch es erneut.",
+  "4100001": "Deine E-Mail-Adresse änderst du über „E-Mail-Adresse ändern“.",
+  "4100002": "Die Registrierung mit Passwort ist gerade nicht möglich. Bitte registriere dich mit einem Code per E-Mail.",
+  "4100003": "Das hat gerade nicht geklappt. Bitte versuch es in ein paar Minuten noch einmal.",
+  "4100004": "Bitte bestätige zuerst deine E-Mail-Adresse.",
+  "4100005": "Eine Anmeldeart hinzufügen oder ändern kannst du erst, wenn du das per Link bestätigt hast.",
   "5000001": "{reason}",
   "5000002": "Es sind keine Authentifizierungsmethoden verfügbar. Bitte wende dich an die Systemadministration.",
   "5000003": "Deine Organisation erfordert eine SSO-Anmeldung, aber es ist kein SSO-Anbieter konfiguriert. Bitte wende dich an die Systemadministration."

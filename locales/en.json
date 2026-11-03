@@ -154,6 +154,11 @@
   "4070003": "The verification flow reached a failure state and must be retried.",
   "4070005": "The interaction expired. Please try again.",
   "4070006": "The verification code is invalid or has already been used. Please try again.",
+  "4100001": "Change your e-mail address with “Change e-mail address”.",
+  "4100002": "Signing up with a password is not possible right now. Please sign up with a code by e-mail.",
+  "4100003": "That did not work right now. Please try again in a few minutes.",
+  "4100004": "Please confirm your e-mail address first.",
+  "4100005": "Please confirm by link before adding or changing a sign-in method.",
   "5000001": "{reason}",
   "5000002": "No authentication methods are available. Please contact the system administrator.",
   "5000003": "Your organization requires SSO authentication, but no SSO provider is configured. Please contact the system administrator."
