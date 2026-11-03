@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.9
+
+- New UI keys for linking an existing account by a code from the e-mail in the SSO account step („Bestehendes Konto verbinden“), the primary way from kratos-flow 0.6.0 on; the password of the existing account stays the second way. In `ui.de.json` (Du form) and `ui.de-sie.json` (Sie form), all in `test/renderer-ui-keys.json`:
+  - The code view: `sso.account.link.code.text` (with `{email}`: there is an account, we send a code to this address, it confirms once that the account is yours and links it), `sso.account.link.code.note` (other devices are signed out), the button `sso.account.link.code.send` („Code senden“), the notices `sso.account.link.code.sent` (with `{email}`, also names the spam folder) and `sso.account.link.code.resent`, the wait before the next code `sso.account.link.code.resend-wait.one`/`.other` (with `{seconds}`), and the field label `sso.account.link.code.label` („Code aus der E-Mail“).
+  - Switching the way: `sso.account.link.use-password` („Stattdessen mit Passwort verbinden“) and `sso.account.link.use-code` („Stattdessen mit Code verbinden“).
+  - Why the code cannot link, with the names of the sign-ins: `sso.account.link.hint.sign-in-method.one`/`.other` (another sign-in belongs to the canou login: sign in with it and link here; if you do not know it, do not link and contact support), `sso.account.link.hint.ambiguous` (more than one sign-in of one kind) and `sso.account.link.hint.address-recent` (the address changed recently; at the latest in an hour). `{methods}` follows „mit“ (dative): the names come from `sso.account.link.method.password` („Passwort“), `.passkey` („Passkey“), `.webauthn` („Sicherheitsschlüssel“), the provider names `oidc.provider.<id>` (through `Localizer.provider`), and `.unknown` („einem anderen Anbieter“) when no name is known; several names are joined with „, “ and, before the last, `sso.account.link.method.and` („und“).
+  - Errors: `sso.account.error.code-expired`, `sso.account.error.code-too-often` (Kratos allows five tries per code request) and `sso.account.error.code-not-linked` (the code was right, linking failed: try again, then request a new code).
+- Not added, because the keys exist: „Konto verbinden“ is `sso.account.link.submit`, „Code erneut senden“ is `forms.label.resend-code`, „6-stelliger Code“ is `forms.placeholder.code`, a wrong code is `forms.error.code-invalid`, an empty field is `forms.validation.code-required`, „Erneut versuchen“ is `forms.button.retry`.
+- Deviations from the plan's wording: `{methods}` follows „mit“ instead of „über“, so a name with an article fits too („mit einem anderen Anbieter“); the hint for several missing sign-ins is a plural pair; the ambiguous hint names the kind after „mehrere Anmeldungen mit“ instead of in brackets.
+- Sie-form checker: „fordere“, „entferne“, „verbinde“ and „sieh“ count as Du imperatives; self-tests for each and for their Sie forms.
+- Tests: every new key in both forms and in the renderer key list, no other key of this block; every text pinned word for word per form; the addressed texts in the catalog's form; placeholders per key; the plural pairs; `{methods}` with one, two and three names and the fallback; the hints name support and what to do with an unknown sign-in; the code errors say how to go on; the reused keys; no technical words.
+- No consumer changes visibly: kratos-flow reads the keys from 0.6.0 on.
+
 ## 0.2.8
 
 - The one-click step „Konto anlegen“ names canou next to the site (Alex, 02.11.): the account is created at both, and the consent checkbox already names both privacy policies.

@@ -36,7 +36,7 @@ const DU_IMPERATIVE = word(
     // "versuch" not after an article: „Noch ein Versuch.“ is the noun (SSO attempts text).
     "prüf", "gib", "(?<!(?:ein|einen)\\s)versuch", "wähl", "mach", "stell", "klick", "melde", "richte", "ändere",
     "bestätige", "bewahre", "schließe", "löse", "starte", "aktualisiere", "lege", "wende",
-    "nutze", "füge", "sende", "gehe",
+    "nutze", "füge", "sende", "gehe", "fordere", "entferne", "verbinde", "sieh",
     // -e forms of the stems above. "prüfe" only before a word, because "Prüfe…" is a
     // first-person progress label; "versuche" only before "es", because "Versuche" is
     // also the plural noun ("Zu viele Versuche").
@@ -77,6 +77,16 @@ const UMLAUT_SUBSTITUTES = word(
     "\\p{L}*erhoeh\\p{L}*", "\\p{L}*kuerz\\p{L}*", "\\p{L}*abschliess\\p{L}*", "heisst", "\\p{L}*strasse",
   ].join("|"),
 );
+
+/** Keys of linking an existing account by a code (0.2.9), tested in their own block. */
+const CODE_LINK_PREFIXES = [
+  "sso.account.link.code.",
+  "sso.account.link.hint.",
+  "sso.account.link.method.",
+  "sso.account.link.use-",
+  "sso.account.error.code-",
+];
+const isCodeLinkKey = (key: string) => CODE_LINK_PREFIXES.some((prefix) => key.startsWith(prefix));
 
 function umlautHits(catalog: Record<string, string>): string[] {
   return Object.entries(catalog)
@@ -154,6 +164,10 @@ describe("Sie-form checker", () => {
       "Mache ein Foto.",
       "Stelle sicher, dass alles stimmt.",
       "Klicke auf den Link.",
+      "Bitte fordere einen neuen an.",
+      "Bitte entferne, was du nicht brauchst.",
+      "Verbinde das Konto bitte nicht.",
+      "Bitte sieh auch im Spam-Ordner nach.",
     ]) {
       assert.ok(DU_IMPERATIVE.test(du), `checker misses: ${du}`);
     }
@@ -163,6 +177,10 @@ describe("Sie-form checker", () => {
       "Bitte versuchen Sie es erneut.",
       "Noch ein Versuch.",
       "Sie haben noch einen Versuch.",
+      "Bitte fordern Sie einen neuen an.",
+      "Bitte entfernen Sie, was Sie nicht brauchen.",
+      "Verbinden Sie das Konto bitte nicht.",
+      "Bitte sehen Sie auch im Spam-Ordner nach.",
     ]) {
       assert.ok(!DU_IMPERATIVE.test(neutral), `false positive: ${neutral}`);
     }
@@ -777,9 +795,15 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
     );
     assert.deepEqual(missing, []);
     assert.deepEqual(NEW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
-    // Every sso.* key of the catalogs is covered here (no untested extra key).
+    // Every sso.* key of the catalogs is covered here or in the block of linking by code (0.2.9),
+    // so no key goes untested.
     for (const catalog of Object.values(catalogs)) {
-      assert.deepEqual(Object.keys(catalog).filter((k) => k.startsWith("sso.")).sort(), [...NEW_KEYS].sort());
+      assert.deepEqual(
+        Object.keys(catalog)
+          .filter((k) => k.startsWith("sso.") && !isCodeLinkKey(k))
+          .sort(),
+        [...NEW_KEYS].sort(),
+      );
     }
   });
 
@@ -898,6 +922,204 @@ describe("SSO account step, canou button and password hint (0.2.7, SSO plan v2 �
 
   it("shows no technical words or raw status names", () => {
     const TECH = /\b(?:SSO|OIDC|OAuth|Kratos|Hydra|FedCM|Token|Session|Status|invalid_credentials|needs_\w+|reset_required|session_invalid|temporarily_unavailable)\b|_/;
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) assert.doesNotMatch(catalog[key]!, TECH, `${name}:${key}`);
+    }
+  });
+});
+
+describe("SSO account step: link an existing account by a code from the e-mail (0.2.9)", () => {
+  const catalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+  // Texts that do not address the user: the same in both forms.
+  const NEUTRAL: Record<string, string> = {
+    "sso.account.link.code.send": "Code senden",
+    "sso.account.link.code.label": "Code aus der E-Mail",
+    "sso.account.link.use-password": "Stattdessen mit Passwort verbinden",
+    "sso.account.link.use-code": "Stattdessen mit Code verbinden",
+    // Names in {methods} after "mit" (dative); OIDC providers come from `oidc.provider.<id>`.
+    "sso.account.link.method.password": "Passwort",
+    "sso.account.link.method.passkey": "Passkey",
+    "sso.account.link.method.webauthn": "Sicherheitsschlüssel",
+    "sso.account.link.method.unknown": "einem anderen Anbieter",
+    "sso.account.link.method.and": "und",
+  };
+  // Texts that address the user, word for word per form.
+  const SIE: Record<string, string> = {
+    "sso.account.link.code.text":
+      "Für {email} gibt es bereits ein Konto, zum Beispiel aus der canou-App oder der bisherigen Plattform. Wir schicken Ihnen einen Code an diese Adresse. Damit bestätigen Sie einmalig, dass das Konto Ihnen gehört, und es wird mit Ihrer Anmeldung verbunden.",
+    "sso.account.link.code.note": "Zu Ihrer Sicherheit melden wir Sie dabei auf Ihren anderen Geräten ab.",
+    "sso.account.link.code.sent": "Wir haben Ihnen einen Code an {email} geschickt. Bitte sehen Sie auch im Spam-Ordner nach.",
+    "sso.account.link.code.resent": "Wir haben Ihnen einen neuen Code geschickt.",
+    "sso.account.link.code.resend-wait.one": "Einen neuen Code können Sie in einer Sekunde anfordern.",
+    "sso.account.link.code.resend-wait.other": "Einen neuen Code können Sie in {seconds} Sekunden anfordern.",
+    "sso.account.link.hint.sign-in-method.one":
+      "Mit einem Code können wir das Konto hier nicht verbinden: Zu Ihrem canou-Login gehört noch eine Anmeldung mit {methods}. Bitte melden Sie sich damit an und verbinden Sie das Konto dann hier. Wenn Sie diese Anmeldung nicht kennen, verbinden Sie das Konto bitte nicht und wenden Sie sich an den Support.",
+    "sso.account.link.hint.sign-in-method.other":
+      "Mit einem Code können wir das Konto hier nicht verbinden: Zu Ihrem canou-Login gehören noch Anmeldungen mit {methods}. Bitte melden Sie sich damit an und verbinden Sie das Konto dann hier. Wenn Sie eine dieser Anmeldungen nicht kennen, verbinden Sie das Konto bitte nicht und wenden Sie sich an den Support.",
+    "sso.account.link.hint.ambiguous":
+      "Zu Ihrem canou-Login gehören mehrere Anmeldungen mit {methods}. Daran können wir nicht sicher erkennen, dass alle Ihnen gehören. Bitte entfernen Sie in Ihren Sicherheitseinstellungen, was Sie nicht brauchen, oder wenden Sie sich an den Support.",
+    "sso.account.link.hint.address-recent":
+      "Ihre E-Mail-Adresse wurde vor Kurzem geändert. Zu Ihrer Sicherheit geht das Verbinden mit Code erst etwas später, spätestens in einer Stunde. Bitte versuchen Sie es dann noch einmal.",
+    "sso.account.error.code-expired": "Der Code ist abgelaufen. Bitte fordern Sie einen neuen an.",
+    "sso.account.error.code-too-often": "Der Code wurde zu oft falsch eingegeben. Bitte fordern Sie einen neuen Code an.",
+    "sso.account.error.code-not-linked":
+      "Der Code hat gestimmt, aber das Verbinden hat gerade nicht geklappt. Bitte versuchen Sie es noch einmal. Klappt es wieder nicht, fordern Sie bitte einen neuen Code an.",
+  };
+  const DU: Record<string, string> = {
+    "sso.account.link.code.text":
+      "Für {email} gibt es bereits ein Konto, zum Beispiel aus der canou-App oder der bisherigen Plattform. Wir schicken dir einen Code an diese Adresse. Damit bestätigst du einmalig, dass das Konto dir gehört, und es wird mit deiner Anmeldung verbunden.",
+    "sso.account.link.code.note": "Zu deiner Sicherheit melden wir dich dabei auf deinen anderen Geräten ab.",
+    "sso.account.link.code.sent": "Wir haben dir einen Code an {email} geschickt. Bitte sieh auch im Spam-Ordner nach.",
+    "sso.account.link.code.resent": "Wir haben dir einen neuen Code geschickt.",
+    "sso.account.link.code.resend-wait.one": "Einen neuen Code kannst du in einer Sekunde anfordern.",
+    "sso.account.link.code.resend-wait.other": "Einen neuen Code kannst du in {seconds} Sekunden anfordern.",
+    "sso.account.link.hint.sign-in-method.one":
+      "Mit einem Code können wir das Konto hier nicht verbinden: Zu deinem canou-Login gehört noch eine Anmeldung mit {methods}. Bitte melde dich damit an und verbinde das Konto dann hier. Wenn du diese Anmeldung nicht kennst, verbinde das Konto bitte nicht und wende dich an den Support.",
+    "sso.account.link.hint.sign-in-method.other":
+      "Mit einem Code können wir das Konto hier nicht verbinden: Zu deinem canou-Login gehören noch Anmeldungen mit {methods}. Bitte melde dich damit an und verbinde das Konto dann hier. Wenn du eine dieser Anmeldungen nicht kennst, verbinde das Konto bitte nicht und wende dich an den Support.",
+    "sso.account.link.hint.ambiguous":
+      "Zu deinem canou-Login gehören mehrere Anmeldungen mit {methods}. Daran können wir nicht sicher erkennen, dass alle dir gehören. Bitte entferne in deinen Sicherheitseinstellungen, was du nicht brauchst, oder wende dich an den Support.",
+    "sso.account.link.hint.address-recent":
+      "Deine E-Mail-Adresse wurde vor Kurzem geändert. Zu deiner Sicherheit geht das Verbinden mit Code erst etwas später, spätestens in einer Stunde. Bitte versuch es dann noch einmal.",
+    "sso.account.error.code-expired": "Der Code ist abgelaufen. Bitte fordere einen neuen an.",
+    "sso.account.error.code-too-often": "Der Code wurde zu oft falsch eingegeben. Bitte fordere einen neuen Code an.",
+    "sso.account.error.code-not-linked":
+      "Der Code hat gestimmt, aber das Verbinden hat gerade nicht geklappt. Bitte versuch es noch einmal. Klappt es wieder nicht, fordere bitte einen neuen Code an.",
+  };
+  const NEW_KEYS = [...Object.keys(NEUTRAL), ...Object.keys(SIE)];
+  const PLACEHOLDERS: Record<string, string[]> = {
+    "sso.account.link.code.text": ["email"],
+    "sso.account.link.code.sent": ["email"],
+    "sso.account.link.code.resend-wait.other": ["seconds"],
+    "sso.account.link.hint.sign-in-method.one": ["methods"],
+    "sso.account.link.hint.sign-in-method.other": ["methods"],
+    "sso.account.link.hint.ambiguous": ["methods"],
+  };
+  /** Existing keys the code view reuses instead of adding a copy. */
+  const REUSED: Record<string, string> = {
+    "sso.account.link.submit": "Konto verbinden",
+    "forms.label.resend-code": "Code erneut senden",
+    "forms.placeholder.code": "6-stelliger Code",
+    "forms.error.code-invalid": "Der Code ist falsch oder abgelaufen.",
+    "forms.button.retry": "Erneut versuchen",
+    "oidc.provider.microsoft": "Microsoft",
+    "oidc.provider.apple": "Apple",
+    "oidc.provider.google": "Google",
+  };
+  /** {methods} the way kratos-flow builds it: names joined with ", " and, before the last, `.and`. */
+  const methods = (catalog: Record<string, string>, names: string[]) => {
+    const and = ` ${catalog["sso.account.link.method.and"]} `;
+    return names.length > 1 ? `${names.slice(0, -1).join(", ")}${and}${names.at(-1)}` : names[0]!;
+  };
+
+  it("has every new key in both forms, non-empty, and in the renderer key list, and no other key of this block", () => {
+    const missing = Object.entries(catalogs).flatMap(([name, catalog]) =>
+      NEW_KEYS.filter((key) => typeof catalog[key] !== "string" || catalog[key]!.trim() === "").map((key) => `${name}:${key}`),
+    );
+    assert.deepEqual(missing, []);
+    assert.deepEqual(NEW_KEYS.filter((key) => !rendererKeys.includes(key)), []);
+    assert.deepEqual(Object.keys(SIE).sort(), Object.keys(DU).sort());
+    for (const catalog of Object.values(catalogs)) {
+      assert.deepEqual(Object.keys(catalog).filter(isCodeLinkKey).sort(), [...NEW_KEYS].sort());
+    }
+    assert.ok(NEW_KEYS.every(isCodeLinkKey));
+  });
+
+  it("keeps the wording: neutral texts the same in both forms, each addressed text word for word per form", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(NEUTRAL)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+    for (const [key, text] of Object.entries(SIE)) assert.equal(uiDeSie[key], text, `ui.de-sie:${key}`);
+    for (const [key, text] of Object.entries(DU)) assert.equal(uiDe[key], text, `ui.de:${key}`);
+  });
+
+  it("addresses the user in the catalog's form (real translation, not a copy)", () => {
+    for (const key of Object.keys(SIE)) {
+      assert.ok(SIE_FORM.test(uiDeSie[key]!), `ui.de-sie:${key} has no Sie form`);
+      assert.ok(DU_PRONOUN.test(uiDe[key]!) || DU_IMPERATIVE.test(uiDe[key]!), `ui.de:${key} has no Du form`);
+      assert.ok(!SIE_FORM.test(uiDe[key]!), `ui.de:${key} has a Sie form`);
+      assert.ok(!(DU_PRONOUN.test(uiDeSie[key]!) || DU_IMPERATIVE.test(uiDeSie[key]!)), `ui.de-sie:${key} has a Du form`);
+    }
+  });
+
+  it("uses only the listed placeholders, the same in both forms", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of NEW_KEYS) assert.deepEqual(placeholders(catalog[key]!), PLACEHOLDERS[key] ?? [], `${name}:${key}`);
+    }
+  });
+
+  it("has plural pairs: .one without a number, .other with {seconds} or {methods}", () => {
+    const plural = NEW_KEYS.filter((key) => /\.(one|other)$/.test(key));
+    assert.deepEqual(plural.sort(), [
+      "sso.account.link.code.resend-wait.one",
+      "sso.account.link.code.resend-wait.other",
+      "sso.account.link.hint.sign-in-method.one",
+      "sso.account.link.hint.sign-in-method.other",
+    ]);
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      assert.doesNotMatch(catalog["sso.account.link.code.resend-wait.one"]!, /\{seconds\}|\d/, name);
+      assert.equal(
+        interpolate(catalog["sso.account.link.code.resend-wait.other"]!, { seconds: 30 }),
+        name === "ui.de" ? "Einen neuen Code kannst du in 30 Sekunden anfordern." : "Einen neuen Code können Sie in 30 Sekunden anfordern.",
+      );
+    }
+  });
+
+  it("builds {methods} from provider and method names after „mit“: one, two, three and the fallback", () => {
+    const one = (catalog: Record<string, string>, names: string[]) =>
+      interpolate(catalog[`sso.account.link.hint.sign-in-method.${names.length === 1 ? "one" : "other"}`]!, { methods: methods(catalog, names) });
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const pronoun = name === "ui.de" ? "deinem" : "Ihrem";
+      assert.match(one(catalog, [catalog["oidc.provider.microsoft"]!]), new RegExp(`Zu ${pronoun} canou-Login gehört noch eine Anmeldung mit Microsoft\\.`), name);
+      assert.match(
+        one(catalog, [catalog["oidc.provider.apple"]!, catalog["sso.account.link.method.passkey"]!]),
+        new RegExp(`Zu ${pronoun} canou-Login gehören noch Anmeldungen mit Apple und Passkey\\.`),
+        name,
+      );
+      assert.match(
+        one(catalog, [catalog["sso.account.link.method.password"]!, catalog["sso.account.link.method.webauthn"]!, catalog["oidc.provider.google"]!]),
+        /Anmeldungen mit Passwort, Sicherheitsschlüssel und Google\./,
+        name,
+      );
+      assert.match(one(catalog, [catalog["sso.account.link.method.unknown"]!]), /eine Anmeldung mit einem anderen Anbieter\./, name);
+      assert.match(
+        interpolate(catalog["sso.account.link.hint.ambiguous"]!, { methods: catalog["sso.account.link.method.passkey"]! }),
+        new RegExp(`^Zu ${pronoun} canou-Login gehören mehrere Anmeldungen mit Passkey\\.`),
+        name,
+      );
+    }
+  });
+
+  it("says what a code does and what to do with a sign-in the user does not know", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      const intro = catalog["sso.account.link.code.text"]!;
+      assert.match(intro, /einen Code an diese Adresse/, name);
+      assert.match(intro, /einmalig/, name);
+      assert.match(intro, /verbunden\.$/, name);
+      assert.match(catalog["sso.account.link.code.note"]!, /anderen Geräten ab\.$/, name);
+      for (const key of ["sso.account.link.hint.sign-in-method.one", "sso.account.link.hint.sign-in-method.other"]) {
+        assert.match(catalog[key]!, /nicht (?:kennst|kennen), (?:verbinde|verbinden Sie) das Konto bitte nicht/, `${name}:${key}`);
+        assert.match(catalog[key]!, /an den Support\.$/, `${name}:${key}`);
+      }
+      assert.match(catalog["sso.account.link.hint.ambiguous"]!, /an den Support\.$/, name);
+      // Every error after a code says how to go on: a new code, or once more.
+      for (const key of ["sso.account.error.code-expired", "sso.account.error.code-too-often", "sso.account.error.code-not-linked"]) {
+        assert.match(catalog[key]!, /neuen( Code)? an\.$/, `${name}:${key}`);
+      }
+    }
+  });
+
+  it("reuses the existing keys for the button, resend, the code field, retry and the provider names", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const [key, text] of Object.entries(REUSED)) assert.equal(catalog[key], text, `${name}:${key}`);
+    }
+    assert.equal(uiDeSie["forms.validation.code-required"], "Bitte geben Sie den Code ein.");
+    assert.equal(uiDe["forms.validation.code-required"], "Bitte gib den Code ein.");
+    for (const key of NEW_KEYS) assert.ok(!/\.(submit|retry|resend|placeholder|invalid|required)$|oidc|provider/.test(key), `copy of a reused key: ${key}`);
+  });
+
+  it("shows no technical words or raw status names", () => {
+    const TECH = /\b(?:SSO|OIDC|OAuth|Kratos|Hydra|Token|Session|Status|OTP|sign_in_method|address_recent|ambiguous|link_\w+)\b|_/;
     for (const [name, catalog] of Object.entries(catalogs)) {
       for (const key of NEW_KEYS) assert.doesNotMatch(catalog[key]!, TECH, `${name}:${key}`);
     }
