@@ -1233,7 +1233,7 @@ describe("purpose codes: confirmation, link way, support hints, address change (
   it("has fusion's Kratos guard messages (4100001-4100005) in every message catalog, in the catalog's form", () => {
     const catalogsById = { de, "de-sie": deSie, en: readJson<Record<string, string>>("../locales/en.json") };
     for (const [name, catalog] of Object.entries(catalogsById)) {
-      for (const id of ["4100001", "4100002", "4100003", "4100004", "4100005"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
+      for (const id of ["4100001", "4100002", "4100003", "4100004", "4100005", "4100008", "4100009", "4100010", "4100011"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
     }
     // 4100004: the settings of a sign-up nobody confirmed yet are frozen; the same sentence as the UI key.
     assert.equal(deSie["4100004"], uiDeSie["settings.frozen"]);
@@ -1245,7 +1245,53 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.match(deSie["4100002"]!, /Code per E-Mail/);
     // 4100005: a clean login changes a first factor (a new sign-in method or the password) without a confirmed link.
     assert.ok(SIE_FORM.test(deSie["4100005"]!) && DU_PRONOUN.test(de["4100005"]!) && !SIE_FORM.test(de["4100005"]!));
-    for (const catalog of [deSie, de]) assert.match(catalog["4100005"]!, /Anmeldeart hinzufügen oder ändern .*per Link bestätigt/);
+    // 0.4.0: a fresh code in this session, no longer a link (plan appendix A).
+    for (const catalog of [deSie, de]) {
+      assert.match(catalog["4100005"]!, /frischen Code/);
+      assert.doesNotMatch(catalog["4100005"]!, /Link/);
+    }
+  });
+
+  it("has the message ids of plan appendix A in the Sie and Du form (0.4.0)", () => {
+    const en = readJson<Record<string, string>>("../locales/en.json");
+    for (const id of ["4100008", "4100009", "4100010", "4100011"]) {
+      assert.ok(SIE_FORM.test(deSie[id]!) || !DU_PRONOUN.test(deSie[id]!), `de-sie:${id}`);
+      assert.ok(!SIE_FORM.test(de[id]!), `de:${id}`);
+      assert.ok(en[id]!.trim(), `en:${id}`);
+    }
+    assert.ok(SIE_FORM.test(deSie["4100008"]!) && DU_PRONOUN.test(de["4100008"]!));
+    assert.ok(SIE_FORM.test(deSie["4100011"]!) && DU_PRONOUN.test(de["4100011"]!));
+    assert.match(deSie["4100008"]!, /Anmeldung, in der Sie die Änderung gestartet haben/);
+    assert.match(deSie["4100009"]!, /abgelaufen oder .* ersetzt/);
+    assert.match(deSie["4100010"]!, /gehört schon zu einem Konto/);
+    assert.match(deSie["4100011"]!, /Google-Adresse/);
+  });
+
+  it("1010016 sends the person on to connect the provider in the settings (0.4.0)", () => {
+    const en = readJson<Record<string, string>>("../locales/en.json");
+    for (const [name, catalog] of Object.entries({ de, "de-sie": deSie, en })) {
+      assert.match(catalog["1010016"]!, /\{duplicateIdentifier\}/, name);
+      assert.match(catalog["1010016"]!, /\{provider\}/, name);
+      assert.ok(/Einstellungen|settings/.test(catalog["1010016"]!), name);
+    }
+  });
+
+  it("labels the traits consent and email_pending in both forms (0.4.0)", () => {
+    for (const ui of [uiDe, uiDeSie]) {
+      assert.equal(ui["property.consent"], "Datenschutz");
+      assert.equal(ui["property.email_pending"], "Neue E-Mail-Adresse");
+    }
+    assert.ok(rendererKeys.includes("property.consent") && rendererKeys.includes("property.email_pending"));
+  });
+
+  it("no locale lacks a message id of de or en (0.4.0)", () => {
+    const en = readJson<Record<string, string>>("../locales/en.json");
+    // de-sie may carry extra ids (4060003, 4070004, 1010020); no id may be missing from a locale.
+    for (const id of Object.keys(de)) {
+      assert.ok(deSie[id]?.trim(), `de-sie:${id}`);
+      assert.ok(en[id]?.trim(), `en:${id}`);
+    }
+    for (const id of Object.keys(en)) assert.ok(de[id]?.trim(), `de:${id}`);
   });
 });
 

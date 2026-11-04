@@ -421,5 +421,7 @@
   "verification.step.done.subtitle": "Ihre E-Mail-Adresse ist jetzt bestätigt.",
   "verification.step.done.title": "Verifiziert",
   "verification.subtitle": "Geben Sie Ihre E-Mail-Adresse ein, um sie zu bestätigen.",
-  "verification.title": "E-Mail bestätigen"
+  "verification.title": "E-Mail bestätigen",
+  "property.consent": "Datenschutz",
+  "property.email_pending": "Neue E-Mail-Adresse"
 }
