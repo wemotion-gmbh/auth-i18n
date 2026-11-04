@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+- Message texts for the Kratos-native flows (plan "Kratos-nativ", PR I1, appendix A) in `de.json`, `de-sie.json` and `en.json`. Existing ids stay stable.
+  - New: 4100008 (the new address was confirmed in another session: confirm in the sign-in where the change was started), 4100009 (the address change expired or was replaced: start it again), 4100010 (the address already belongs to an account, neutral), 4100011 (Google sign-up with another address than the Google one: use the Google address or sign up with a code).
+  - Changed: 4100005 now asks for a fresh code in this session (sign in again with a code by e-mail, then try again); it no longer says "by link" (links are gone, codes only). 1010016 (address already used by another account) now says: sign in to your account, then connect the provider in the settings; it no longer promises to add the provider during the sign-in.
+  - 4100003 (could not decide, also Kratos 502/504) is unchanged. 4100006 stays unassigned, 4100007 is shown by the consumer from fusion's error, not as a Kratos message.
+- Field labels `property.consent` („Datenschutz“) and `property.email_pending` („Neue E-Mail-Adresse“) in `ui.de.json`, `ui.de-sie.json` and `test/renderer-ui-keys.json`.
+- Unknown ids: unchanged and now pinned by README: `createLocalizer({ unknown: "kratos" | "generic" })` shows Kratos' own text or the generic text per type (`forms.error.generic`, `forms.info.generic`, `forms.success.generic`, never empty) and calls `onMissing`; `localizeUiText` falls back to the English catalog, then Kratos' text.
+- Tests: ids 4100008-4100011 and the new 4100005 wording in every catalog and form, 1010016 points to the settings, the two labels, and no locale lacks a message id.
+
 ## 0.3.0
 
 - Texts for purpose codes (plan "Zweckgebundene Codes, browsergebundene Links, Kontoverbindung und Adressänderung", §3; approved 03.11.): a link by e-mail that confirms only in the browser that asked for it; in any other browser the link page shows a code with a fixed warning sentence, never "continue here". All keys in `ui.de-sie.json` (Sie) and `ui.de.json` (Du); texts that address no one are the same in both.
