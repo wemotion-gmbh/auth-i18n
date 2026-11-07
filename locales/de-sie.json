@@ -161,7 +161,7 @@
   "4100002": "Die Registrierung mit Passwort ist gerade nicht möglich. Bitte registrieren Sie sich mit einem Code per E-Mail.",
   "4100003": "Das hat gerade nicht geklappt. Bitte versuchen Sie es in ein paar Minuten noch einmal.",
   "4100004": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
-  "4100005": "Dafür brauchen Sie einen frischen Code: Melden Sie sich bitte neu mit einem Code per E-Mail an und versuchen Sie es dann noch einmal.",
+  "4100005": "Zur Sicherheit brauchen wir dafür einen frischen Code aus Ihrer E-Mail, der höchstens 15 Minuten alt ist. Bei einem zweiten Faktor brauchen Sie auch diesen.",
   "4100008": "Bitte bestätigen Sie in der Anmeldung, in der Sie die Änderung gestartet haben.",
   "4100009": "Die Adressänderung ist abgelaufen oder wurde durch eine neuere ersetzt. Bitte starten Sie sie neu.",
   "4100010": "Diese Adresse gehört schon zu einem Konto.",
