@@ -1245,11 +1245,16 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.match(deSie["4100002"]!, /Code per E-Mail/);
     // 4100005: a clean login changes a first factor (a new sign-in method or the password) without a confirmed link.
     assert.ok(SIE_FORM.test(deSie["4100005"]!) && DU_PRONOUN.test(de["4100005"]!) && !SIE_FORM.test(de["4100005"]!));
-    // 0.4.0: a fresh code in this session, no longer a link (plan appendix A).
+    // 0.4.1: only "a fresh e-mail code is needed" (fusion KratosSettings TEXT_FRESH_CODE), never "sign in again".
     for (const catalog of [deSie, de]) {
-      assert.match(catalog["4100005"]!, /frischen Code/);
-      assert.doesNotMatch(catalog["4100005"]!, /Link/);
+      assert.match(catalog["4100005"]!, /frischen Code aus (deiner|Ihrer) E-Mail/);
+      assert.match(catalog["4100005"]!, /höchstens 15 Minuten/);
+      assert.match(catalog["4100005"]!, /zweiten Faktor/);
+      assert.doesNotMatch(catalog["4100005"]!, /Link|anmelden|Anmeldung/);
     }
+    const en5 = catalogsById.en["4100005"]!;
+    assert.match(en5, /fresh code from your e-mail/);
+    assert.doesNotMatch(en5, /sign in again|log in again/i);
   });
 
   it("has the message ids of plan appendix A in the Sie and Du form (0.4.0)", () => {

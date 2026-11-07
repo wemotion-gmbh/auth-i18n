@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1
+
+- Message 4100005 (settings guard) in `de.json`, `de-sie.json` and `en.json` now only says that a fresh e-mail code is needed (no older than 15 minutes, with a second factor that one too). It no longer says "sign in again": the client sends a code at once and shows the code field inline (Alex, 06.11.). Same meaning as fusion's fallback text `TEXT_FRESH_CODE` (fusion-api-v3 #522).
+- Checked and left unchanged: `error.page.restart` („Neu anmelden“, error page), `login.title-refresh` („Erneut anmelden“, login refresh) and `changePassword.success.message.logoutFlow` (logout after a password change) are not the settings step-up.
+- Tests: 4100005 pinned in every form (fresh code from the e-mail, 15 minutes, second factor, no "sign in").
+
 ## 0.4.0
 
 - Message texts for the Kratos-native flows (plan "Kratos-nativ", PR I1, appendix A) in `de.json`, `de-sie.json` and `en.json`. Existing ids stay stable.
