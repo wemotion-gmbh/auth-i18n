@@ -32,8 +32,8 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "confirm.use-code-login": "Stattdessen mit Code per E-Mail anmelden",
     "confirm.other-method": "Andere Anmeldeart wählen",
     "confirm.link.action.signup": "E-Mail-Adresse bestätigen",
-    "confirm.link.action.email-change": "Neue Adresse bestätigen",
-    "confirm.link.action.email-change-old": "Änderung bestätigen",
+    "confirm.link.action.email-change": "Adressänderung mit Code bestätigen",
+    "confirm.link.action.email-change-old": "Adressänderung mit Code bestätigen",
     "confirm.link.action.account-link": "Konto verbinden",
     "confirm.link.reveal": "Code anzeigen",
     "confirm.link.copy": "Code kopieren",
@@ -47,7 +47,10 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "sso.account.verify.code-button": "Mit Code per E-Mail anmelden",
     "email-change.title": "E-Mail-Adresse ändern",
     "email-change.open": "E-Mail-Adresse ändern",
-    "email-change.send": "Link senden",
+    "email-change.send": "Code senden",
+    "email-change.code.label": "Code aus der E-Mail",
+    "email-change.code.submit": "Bestätigen",
+    "email-change.resend": "Neuen Code senden",
     "email-change.cancel": "Änderung abbrechen",
     "email-change.in-use": "Diese Adresse gehört schon zu einem anderen Konto.",
     "email-change.taken": "Diese Adresse ist inzwischen vergeben.",
@@ -96,15 +99,18 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "sso.account.verify.code-text": "Bitte melden Sie sich einmal mit einem Code per E-Mail an. Damit bestätigen Sie, dass die Adresse Ihnen gehört.",
     "email-change.intro": "Ihre bisherige Adresse bleibt gültig, bis Sie die neue bestätigt haben.",
     "email-change.elsewhere": "Ihre Anmelde-Adresse ändern Sie in Ihrem canou-Konto. Die bisherige Adresse bleibt gültig, bis Sie die neue bestätigt haben.",
-    "email-change.old.text": "Zuerst bestätigen Sie, dass Sie Ihre bisherige Adresse {email} noch nutzen. Wir schicken Ihnen dorthin einen Link.",
-    "email-change.old.sent": "Wir haben Ihnen einen Link an Ihre bisherige Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
-    "email-change.new.sent": "Wir haben Ihnen einen Link an die neue Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffnen Sie ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "email-change.old.text": "Zuerst bestätigen Sie, dass Sie Ihre bisherige Adresse {email} noch nutzen. Wir schicken Ihnen dorthin einen Code.",
+    "email-change.old.sent": "Wir haben Ihnen einen Code an Ihre bisherige Adresse {email} geschickt. Er gilt bis {time} Uhr. Geben Sie ihn hier ein. Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem Sie die Änderung begonnen haben.",
+    "email-change.new.sent": "Wir haben Ihnen einen Code an die neue Adresse {email} geschickt. Er gilt bis {time} Uhr. Geben Sie ihn hier ein. Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem Sie die Änderung begonnen haben.",
     "email-change.pending": "Sie haben die Änderung auf {email} angefordert.",
     "email-change.cancelled": "Die Änderung ist abgebrochen. Ihre Anmelde-Adresse bleibt {email}.",
     "email-change.no-access": "Kein Zugriff mehr auf Ihre bisherige Adresse? Wenden Sie sich an {support}.",
     "email-change.same": "Das ist schon Ihre Anmelde-Adresse.",
     "email-change.done": "Ihre Anmelde-Adresse ist jetzt {email}.",
     "email-change.blocked": "Ihre Anmelde-Adresse lässt sich hier gerade nicht ändern. Bitte wenden Sie sich an {support}.",
+    "email-change.code.hint": "Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem Sie die Änderung begonnen haben.",
+    "email-change.resent": "Wir haben Ihnen einen neuen Code geschickt. Der vorige gilt nicht mehr.",
+    "confirm.link.code-only": "Eine Adressänderung bestätigen Sie mit dem Code aus der E-Mail, in der Sitzung, in der Sie sie begonnen haben.",
   },
   du: {
     "confirm.signup.title": "Bitte bestätige deine E-Mail-Adresse",
@@ -150,15 +156,18 @@ const PURPOSE_CODE_SPEC: { neutral: Record<string, string>; sie: Record<string, 
     "sso.account.verify.code-text": "Bitte melde dich einmal mit einem Code per E-Mail an. Damit bestätigst du, dass die Adresse dir gehört.",
     "email-change.intro": "Deine bisherige Adresse bleibt gültig, bis du die neue bestätigt hast.",
     "email-change.elsewhere": "Deine Anmelde-Adresse änderst du in deinem canou-Konto. Die bisherige Adresse bleibt gültig, bis du die neue bestätigt hast.",
-    "email-change.old.text": "Zuerst bestätigst du, dass du deine bisherige Adresse {email} noch nutzt. Wir schicken dir dorthin einen Link.",
-    "email-change.old.sent": "Wir haben dir einen Link an deine bisherige Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
-    "email-change.new.sent": "Wir haben dir einen Link an die neue Adresse {email} geschickt. Er gilt bis {time} Uhr. Öffne ihn in diesem Browser, dann geht es hier von selbst weiter.",
+    "email-change.old.text": "Zuerst bestätigst du, dass du deine bisherige Adresse {email} noch nutzt. Wir schicken dir dorthin einen Code.",
+    "email-change.old.sent": "Wir haben dir einen Code an deine bisherige Adresse {email} geschickt. Er gilt bis {time} Uhr. Gib ihn hier ein. Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem du die Änderung begonnen hast.",
+    "email-change.new.sent": "Wir haben dir einen Code an die neue Adresse {email} geschickt. Er gilt bis {time} Uhr. Gib ihn hier ein. Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem du die Änderung begonnen hast.",
     "email-change.pending": "Du hast die Änderung auf {email} angefordert.",
     "email-change.cancelled": "Die Änderung ist abgebrochen. Deine Anmelde-Adresse bleibt {email}.",
     "email-change.no-access": "Kein Zugriff mehr auf deine bisherige Adresse? Wende dich an {support}.",
     "email-change.same": "Das ist schon deine Anmelde-Adresse.",
     "email-change.done": "Deine Anmelde-Adresse ist jetzt {email}.",
     "email-change.blocked": "Deine Anmelde-Adresse lässt sich hier gerade nicht ändern. Bitte wende dich an {support}.",
+    "email-change.code.hint": "Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem du die Änderung begonnen hast.",
+    "email-change.resent": "Wir haben dir einen neuen Code geschickt. Der vorige gilt nicht mehr.",
+    "confirm.link.code-only": "Eine Adressänderung bestätigst du mit dem Code aus der E-Mail, in der Sitzung, in der du sie begonnen hast.",
   },
 };
 
@@ -1174,15 +1183,32 @@ describe("purpose codes: confirmation, link way, support hints, address change (
 
   it("names a link, never a code, for what the e-mail brings, with the time it is valid", () => {
     for (const [name, catalog] of Object.entries(catalogs)) {
-      for (const key of ["confirm.sent", "email-change.old.sent", "email-change.new.sent"]) {
-        assert.match(catalog[key]!, /einen Link an .*\{email\} geschickt\. Er gilt bis \{time\} Uhr\./, `${name}:${key}`);
-        assert.match(catalog[key]!, /in diesem Browser/, `${name}:${key}`);
-      }
-      for (const key of ["sso.account.link.code.text", "confirm.resent", "confirm.resend", "sso.account.link.code.send", "email-change.send"]) {
+      assert.match(catalog["confirm.sent"]!, /einen Link an .*\{email\} geschickt\. Er gilt bis \{time\} Uhr\./, `${name}:confirm.sent`);
+      assert.match(catalog["confirm.sent"]!, /in diesem Browser/, `${name}:confirm.sent`);
+      for (const key of ["sso.account.link.code.text", "confirm.resent", "confirm.resend", "sso.account.link.code.send"]) {
         assert.match(catalog[key]!, /Link/, `${name}:${key}`);
         assert.doesNotMatch(catalog[key]!, /Code/, `${name}:${key}`);
       }
     }
+  });
+
+  it("confirms an address change by code only, in the session that started it (0.6.0)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of ["email-change.old.sent", "email-change.new.sent"]) {
+        assert.match(catalog[key]!, /einen Code an .*\{email\} geschickt\. Er gilt bis \{time\} Uhr\./, `${name}:${key}`);
+        assert.match(catalog[key]!, /nur in dieser Sitzung/, `${name}:${key}`);
+        assert.doesNotMatch(catalog[key]!, /Link/, `${name}:${key}`);
+      }
+      for (const key of ["email-change.send", "email-change.old.text", "email-change.resend", "email-change.resent", "email-change.code.hint", "confirm.link.code-only", "confirm.link.action.email-change", "confirm.link.action.email-change-old"]) {
+        assert.doesNotMatch(catalog[key]!, /Link|Browser\b.*öffn/i, `${name}:${key}`);
+      }
+      assert.match(catalog["email-change.send"]!, /Code/, name);
+      assert.match(catalog["email-change.resend"]!, /Neuen Code/, name);
+      assert.match(catalog["email-change.code.hint"]!, /nur in dieser Sitzung/, name);
+      assert.match(catalog["confirm.link.code-only"]!, /Code aus der E-Mail, in der Sitzung, in der \w+ sie begonnen \w+\./, name);
+    }
+    assert.equal(uiDe["confirm.link.code-only"], "Eine Adressänderung bestätigst du mit dem Code aus der E-Mail, in der Sitzung, in der du sie begonnen hast.");
+    assert.equal(uiDeSie["confirm.link.code-only"], "Eine Adressänderung bestätigen Sie mit dem Code aus der E-Mail, in der Sitzung, in der Sie sie begonnen haben.");
   });
 
   it("offers the link way first and the password second in the account step", () => {
@@ -1360,7 +1386,6 @@ describe("credential_add: link before adding or changing a first factor (0.3.0)"
       for (const key of ["credential-add.sent", "credential-add.sent-untimed"]) assert.match(catalog[key]!, /einen Link an \{email\} geschickt\./, key);
       assert.match(catalog["credential-add.sent"]!, /Er gilt bis \{time\} Uhr\./);
       for (const key of ["credential-add.sent", "credential-add.sent-untimed"]) assert.match(catalog[key]!, /in diesem Browser/, key);
-      assert.equal(catalog["credential-add.send"], catalog["email-change.send"]);
     }
   });
 });
