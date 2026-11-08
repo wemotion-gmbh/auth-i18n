@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.2
+
+- Message 1010015 (send sign-in code, the button in login step 2) in `de-sie.json` now says „Anmeldecode senden“, like `de.json` (Alex, 08.11., answer 2a: step 2 shows „Mit Passwort anmelden“, „Passwort vergessen?“ and „Anmeldecode senden“ everywhere). The text has no address form, so the Sie text equals the Du text; before, the Leinerstift portal showed „Code per E-Mail senden“. Registration (1040006), verification, settings and recovery texts are unchanged.
+- Tests: 1010015 is identical in Du and Sie form.
+
 ## 0.6.1
 
 - Message 1010016 (login with a provider whose address already belongs to an account) in `de.json`, `de-sie.json` and `en.json` now says that a code confirms it and the provider is connected right after: „Die Adresse gehört schon zu deinem Konto. Bestätige mit einem Code, dann verbinden wir {provider} damit.“ (Sie form and English analogous). The old text sent the person to the settings, but the step links directly after the code (Alex, 08.11.). Neutral wording „Konto“ (no brand name), because the Hub, canou-auth and Leinerstift share the text. The placeholder `{duplicateIdentifier}` is no longer used by this message; `{provider}` stays.

@@ -13,7 +13,7 @@
   "1010012": "Halten Sie Ihr WebAuthn-Gerät bereit (z. B. Sicherheitsschlüssel oder Fingerabdrucksensor) und klicken Sie auf „Weiter“.",
   "1010013": "Weiter",
   "1010014": "Wir haben einen Code an die angegebene Adresse gesendet. Falls Sie ihn nicht erhalten haben, prüfen Sie bitte die Schreibweise der Adresse und versuchen Sie es erneut.",
-  "1010015": "Code per E-Mail senden",
+  "1010015": "Anmeldecode senden",
   "1010016": "Die Adresse gehört schon zu Ihrem Konto. Bestätigen Sie mit einem Code, dann verbinden wir {provider} damit.",
   "1010017": "Anmelden und verknüpfen",
   "1010018": "Mit {provider} bestätigen",
