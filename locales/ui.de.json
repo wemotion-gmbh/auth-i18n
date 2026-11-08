@@ -160,6 +160,7 @@
   "forms.validation.password-mismatch": "Die Passwörter stimmen nicht überein.",
   "forms.validation.password-required": "Bitte gib dein Passwort ein.",
   "forms.validation.required": "Bitte füll das Feld „{property}“ aus.",
+  "forms.validation.requiredCheckbox": "Bitte setze den Haken bei „{property}“.",
   "input.placeholder": "Gib dein(e) {placeholder} ein",
   "login.2fa.go-back": "Funktioniert etwas nicht?",
   "login.2fa.go-back.link": "Zurück",

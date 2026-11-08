@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+- New UI key `forms.validation.requiredCheckbox` next to `forms.validation.required`, with the same placeholder `{property}`, in `ui.de.json` („Bitte setze den Haken bei „{property}“.“) and `ui.de-sie.json` („Bitte setzen Sie den Haken bei „{property}“.“). For required checkboxes such as the consent: „Bitte gib Datenschutz ein“ does not fit a checkbox (kratos-flow#31). kratos-flow 0.10.2 uses the key for nodes of input type checkbox.
+- There is no English UI catalog in this package (English exists only for the Kratos messages in `en.json`); the English UI texts live as kratos-flow defaults, so the English text “Please tick “{property}”.” is added there, not here.
+- Unchanged: every other key, the Kratos message ids (4000002 etc.) and the courier templates.
+- `test/renderer-ui-keys.json` lists the new key. Tests: key in both forms, `{property}` placeholder, Sie and Du wording, `forms.validation.required` unchanged.
+
 ## 0.4.1
 
 - Message 4100005 (settings guard) in `de.json`, `de-sie.json` and `en.json` now only says that a fresh e-mail code is needed (no older than 15 minutes, with a second factor that one too). It no longer says "sign in again": the client sends a code at once and shows the code field inline (Alex, 06.11.). Same meaning as fusion's fallback text `TEXT_FRESH_CODE` (fusion-api-v3 #522).

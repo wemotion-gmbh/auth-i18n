@@ -86,6 +86,7 @@
     "forms.validation.password-mismatch",
     "forms.validation.password-required",
     "forms.validation.required",
+    "forms.validation.requiredCheckbox",
     "login.busy",
     "login.button.submitting",
     "login.code.too-many",
