@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0
+
+- An address change is confirmed only by the e-mail code, in the session that started it (fusion-api-v3 #527, Alex 03.11./06.11.). The UI texts for the address change dialog and the link page change from link to code; all keys that consumers use are kept.
+  - Changed (Du and Sie): `email-change.send` („Code senden“), `email-change.old.text` (we send a code to the old address), `email-change.old.sent` and `email-change.new.sent` („Wir haben dir einen Code an … geschickt. Er gilt bis {time} Uhr. Gib ihn hier ein. Der Code funktioniert nur in dieser Sitzung, also in dem Browserfenster, in dem du die Änderung begonnen hast.“), `confirm.link.action.email-change` and `confirm.link.action.email-change-old` (both „Adressänderung mit Code bestätigen“).
+  - New: `email-change.code.{label,hint,submit}` (code field with the hint that the code works only in this session), `email-change.resend` („Neuen Code senden“), `email-change.resent`, and `confirm.link.code-only` for fusion's refusal `refused` / `code_only` („Eine Adressänderung bestätigst du mit dem Code aus der E-Mail, in der Sitzung, in der du sie begonnen hast.“ / Sie form).
+  - Unchanged: `confirm.resend`, `confirm.sent*` and the other `confirm.*` keys (sign-up confirmation and account link still use a link), `credential-add.*`.
+  - Tests: the address change texts name a code and the session, never a link; `confirm.link.code-only` pinned in both forms. canou-auth follows with the consumers.
+
 ## 0.5.0
 
 - New UI key `forms.validation.requiredCheckbox` next to `forms.validation.required`, with the same placeholder `{property}`, in `ui.de.json` („Bitte setze den Haken bei „{property}“.“) and `ui.de-sie.json` („Bitte setzen Sie den Haken bei „{property}“.“). For required checkboxes such as the consent: „Bitte gib Datenschutz ein“ does not fit a checkbox (kratos-flow#31). kratos-flow 0.10.2 uses the key for nodes of input type checkbox.
