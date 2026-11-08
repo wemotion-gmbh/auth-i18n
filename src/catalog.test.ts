@@ -1313,6 +1313,11 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     }
   });
 
+  it("the sign-in code button reads the same in Du and Sie form (0.6.2)", () => {
+    assert.equal(de["1010015"], "Anmeldecode senden");
+    assert.equal(deSie["1010015"], de["1010015"]);
+  });
+
   it("labels the traits consent and email_pending in both forms (0.4.0)", () => {
     for (const ui of [uiDe, uiDeSie]) {
       assert.equal(ui["property.consent"], "Datenschutz");
