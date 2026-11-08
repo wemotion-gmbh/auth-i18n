@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+
+- Message 1010016 (login with a provider whose address already belongs to an account) in `de.json`, `de-sie.json` and `en.json` now says that a code confirms it and the provider is connected right after: „Die Adresse gehört schon zu deinem Konto. Bestätige mit einem Code, dann verbinden wir {provider} damit.“ (Sie form and English analogous). The old text sent the person to the settings, but the step links directly after the code (Alex, 08.11.). Neutral wording „Konto“ (no brand name), because the Hub, canou-auth and Leinerstift share the text. The placeholder `{duplicateIdentifier}` is no longer used by this message; `{provider}` stays.
+- New UI key `login.link.code-sent` in `ui.de.json` („Wir haben dir einen Code an {email} geschickt.“) and `ui.de-sie.json` („Wir haben Ihnen einen Code an {email} geschickt.“) for the code step of the account link. kratos-flow 0.10.6 uses it. The resend label already exists as `forms.label.resend-code` („Code erneut senden“) and is reused.
+- Tests: 1010016 names a code and `{provider}` in every catalog and no longer points to the settings; the new key in both forms.
+
 ## 0.6.0
 
 - An address change is confirmed only by the e-mail code, in the session that started it (fusion-api-v3 #527, Alex 03.11./06.11.). The UI texts for the address change dialog and the link page change from link to code; all keys that consumers use are kept.

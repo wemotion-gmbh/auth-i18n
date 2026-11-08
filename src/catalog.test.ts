@@ -1298,12 +1298,18 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.match(deSie["4100011"]!, /Google-Adresse/);
   });
 
-  it("1010016 sends the person on to connect the provider in the settings (0.4.0)", () => {
+  it("login.link.code-sent names the address in both forms (0.6.1)", () => {
+    assert.equal(uiDe["login.link.code-sent"], "Wir haben dir einen Code an {email} geschickt.");
+    assert.equal(uiDeSie["login.link.code-sent"], "Wir haben Ihnen einen Code an {email} geschickt.");
+    assert.equal(uiDe["forms.label.resend-code"], "Code erneut senden");
+  });
+
+  it("1010016 asks for a code and connects the provider right after (0.6.1)", () => {
     const en = readJson<Record<string, string>>("../locales/en.json");
     for (const [name, catalog] of Object.entries({ de, "de-sie": deSie, en })) {
-      assert.match(catalog["1010016"]!, /\{duplicateIdentifier\}/, name);
       assert.match(catalog["1010016"]!, /\{provider\}/, name);
-      assert.ok(/Einstellungen|settings/.test(catalog["1010016"]!), name);
+      assert.match(catalog["1010016"]!, /Code|code/, name);
+      assert.ok(!/Einstellungen|settings/.test(catalog["1010016"]!), name);
     }
   });
 

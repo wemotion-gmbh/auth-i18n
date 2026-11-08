@@ -14,7 +14,7 @@
   "1010013": "Weiter",
   "1010014": "Wir haben einen Code an die angegebene Adresse gesendet. Falls Sie ihn nicht erhalten haben, prüfen Sie bitte die Schreibweise der Adresse und versuchen Sie es erneut.",
   "1010015": "Code per E-Mail senden",
-  "1010016": "Sie haben versucht, sich mit „{duplicateIdentifier}“ anzumelden, diese E-Mail-Adresse gehört aber bereits zu einem anderen Konto. Melden Sie sich bei Ihrem Konto an, danach können Sie {provider} in den Einstellungen verbinden.",
+  "1010016": "Die Adresse gehört schon zu Ihrem Konto. Bestätigen Sie mit einem Code, dann verbinden wir {provider} damit.",
   "1010017": "Anmelden und verknüpfen",
   "1010018": "Mit {provider} bestätigen",
   "1010019": "Code anfordern, um fortzufahren",
