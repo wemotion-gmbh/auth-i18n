@@ -191,6 +191,7 @@
   "login.step.code.title": "Code eingeben",
   "login.step.identifier.subtitle": "Melde dich an, um fortzufahren.",
   "login.step.identifier.title": "Willkommen",
+  "login.link.code-sent": "Wir haben dir einen Code an {email} geschickt.",
   "login.step.link.hint": "Mit diesem Konto verknüpfen",
   "login.step.method.subtitle": "Gib dein Passwort ein oder fordere einen Code an.",
   "login.step.method.title": "Willkommen zurück",

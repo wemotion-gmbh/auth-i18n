@@ -14,7 +14,7 @@
   "1010013": "Continue",
   "1010014": "A code was sent to the address you provided. If you didn't receive it, please check the spelling of the address and try again.",
   "1010015": "Send sign in code",
-  "1010016": "You tried to sign in with “{duplicateIdentifier}”, but that email address already belongs to another account. Sign in to your account, then connect {provider} in the settings.",
+  "1010016": "This address already belongs to your account. Confirm with a code, then we will connect {provider} to it.",
   "1010017": "Sign in and link",
   "1010018": "Confirm with {provider}",
   "1010019": "Request code to continue",
