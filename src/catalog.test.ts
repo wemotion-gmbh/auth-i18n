@@ -1289,6 +1289,14 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.ok(rendererKeys.includes("property.consent") && rendererKeys.includes("property.email_pending"));
   });
 
+  it("has a checkbox wording next to the required wording (0.5.0)", () => {
+    assert.equal(uiDe["forms.validation.requiredCheckbox"], "Bitte setze den Haken bei „{property}“.");
+    assert.equal(uiDeSie["forms.validation.requiredCheckbox"], "Bitte setzen Sie den Haken bei „{property}“.");
+    assert.equal(uiDe["forms.validation.required"], "Bitte füll das Feld „{property}“ aus.");
+    assert.equal(uiDeSie["forms.validation.required"], "Bitte füllen Sie das Feld „{property}“ aus.");
+    assert.ok(rendererKeys.includes("forms.validation.requiredCheckbox"));
+  });
+
   it("no locale lacks a message id of de or en (0.4.0)", () => {
     const en = readJson<Record<string, string>>("../locales/en.json");
     // de-sie may carry extra ids (4060003, 4070004, 1010020); no id may be missing from a locale.
