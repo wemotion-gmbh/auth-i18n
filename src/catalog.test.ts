@@ -1400,3 +1400,77 @@ describe("credential_add: link before adding or changing a first factor (0.3.0)"
     }
   });
 });
+
+describe("0.7.0 catalog hygiene and new keys", () => {
+  const rawKeys = (file: string): string[] =>
+    [...readFileSync(new URL(file, import.meta.url), "utf8").matchAll(/^ {2}"((?:[^"\\]|\\.)*)":/gm)].map((m) => m[1]!);
+  const files = ["../locales/de.json", "../locales/de-sie.json", "../locales/en.json", "../locales/ui.de.json", "../locales/ui.de-sie.json"];
+
+  it("has no duplicate key in any catalog file (JSON.parse would hide it)", () => {
+    for (const file of files) {
+      const keys = rawKeys(file);
+      const dupes = keys.filter((k, i) => keys.indexOf(k) !== i);
+      assert.deepEqual(dupes, [], file);
+    }
+  });
+
+  it("keeps every message id of de.json in de-sie.json and en.json", () => {
+    assert.deepEqual(Object.keys(de).filter((k) => !(k in deSie)), []);
+    assert.deepEqual(Object.keys(de).filter((k) => !(k in kratosIdsEn())), []);
+  });
+
+  it("1070012 (registration code field) is just „Code“ in every catalog", () => {
+    assert.equal(de["1070012"], "Code");
+    assert.equal(deSie["1070012"], "Code");
+    assert.equal(kratosIdsEn()["1070012"], "Code");
+  });
+
+  const NEW_PREFIXES = ["code-link.", "verification.link.", "devices.", "settings.consent.", "settings.step-up.", "flow.", "oidc-return.", "signin.end.", "passkey-prompt.", "callback.", "logout.confirm."];
+  const isNew = (k: string) => NEW_PREFIXES.some((p) => k.startsWith(p));
+
+  it("has the new keys in Du and Sie, non-empty, and the Sie form really differs where the text addresses the reader", () => {
+    const keys = Object.keys(uiDe).filter(isNew);
+    assert.ok(keys.length >= 70, `only ${keys.length} new keys`);
+    for (const k of keys) {
+      assert.ok(uiDe[k] && uiDeSie[k], k);
+      if (SIE_FORM.test(uiDeSie[k]!)) assert.ok(!DU_PRONOUN.test(uiDeSie[k]!), `Sie text of ${k} uses du`);
+      assert.ok(!SIE_FORM.test(uiDe[k]!) || !DU_PRONOUN.test(uiDeSie[k]!), k);
+      assert.ok(!DU_PRONOUN.test(uiDeSie[k]!), `${k} Sie text has a Du pronoun`);
+    }
+  });
+
+  it("covers the 24 kratos-flow fallback texts, the mail link keys and the device keys", () => {
+    const required = [
+      "registration.step.traits.new-account", "registration.step.code.subtitle-new-account", "login.step.link.code-hint",
+      "verification.link.title", "verification.link.confirm-hint", "verification.link.confirm-button", "verification.link.code-hint",
+      "verification.link.code-label", "verification.link.invalid",
+      "settings.consent.title", "settings.consent.hint", "settings.consent.submit", "settings.consent.status-open", "settings.consent.action",
+      "settings.step-up.title", "settings.step-up.code-sent", "settings.step-up.code-sent-oidc", "settings.step-up.code-sent-aal2",
+      "settings.step-up.submit", "settings.step-up.cancel", "settings.step-up.send-failed", "settings.step-up.no-address",
+      "settings.step-up.still-refused", "settings.step-up.tap-again", "settings.step-up.totp-again", "settings.step-up.second-factor",
+      "code-link.other-place.hint", "code-link.app.hint", "code-link.expired", "code-link.done-elsewhere", "code-link.restart.login",
+      "code-link.restart.registration", "code-link.restart.recovery", "code-link.step-up-done", "code-link.legacy-mail",
+      "devices.title", "devices.this-device", "devices.sign-out", "devices.sign-out-others", "devices.confirm.title", "devices.confirm.text",
+    ];
+    assert.deepEqual(required.filter((k) => !uiDe[k] || !uiDeSie[k] || !rendererKeys.includes(k)), []);
+    assert.equal(uiDe["devices.this-device"], "Dieses Gerät");
+    assert.equal(uiDe["devices.sign-out-others"], "Überall sonst abmelden");
+  });
+
+  it("labels the name fields and uses the salutation set Frau, Herr, Divers, keine Angabe", () => {
+    const labels = { "property.salutation": "Anrede", "property.title": "Titel", "property.nickname": "Spitzname", "property.middle": "2. Vorname", "property.first": "Vorname", "property.last": "Nachname" };
+    for (const [k, v] of Object.entries(labels)) {
+      assert.equal(uiDe[k], v, k);
+      assert.equal(uiDeSie[k], v, k);
+    }
+    const values = ["frau", "herr", "divers", "keine-angabe"].map((s) => uiDe[`property.salutation.${s}`]);
+    assert.deepEqual(values, ["Frau", "Herr", "Divers", "keine Angabe"]);
+    assert.deepEqual(values, ["frau", "herr", "divers", "keine-angabe"].map((s) => uiDeSie[`property.salutation.${s}`]));
+    assert.equal(uiDe["settings.profile.name.required"], "Bitte trag Vor- und Nachnamen ein.");
+    assert.equal(uiDeSie["settings.profile.name.required"], "Bitte tragen Sie Vor- und Nachnamen ein.");
+  });
+});
+
+function kratosIdsEn(): Record<string, string> {
+  return readJson<Record<string, string>>("../locales/en.json");
+}

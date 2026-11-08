@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0
+
+- The fallback texts of kratos-flow 0.10.6 (`src/react/fallback-texts.ts`) now live in the catalog, Du and Sie, so that the renderer no longer needs its own copy: `registration.step.traits.new-account`, `registration.step.code.subtitle-new-account`, `login.step.link.code-hint`, `verification.link.*` (title, confirm hint and button, code hint and label, invalid), `settings.consent.*` and `settings.step-up.*` (24 keys). `login.link.code-sent` and the message ids 4100008 to 4100011 were already here and are not repeated.
+- Message 1070012 (the code field of the registration) is now just „Code“ in `de.json`, `de-sie.json` and `en.json`.
+- Mail link pages (Q4, kratos-flow 0.11.0): `code-link.*` (`other-place.hint`, `app.hint`, `expired`, `done-elsewhere`, `continue`, `restart.{login,registration,recovery}`, `step-up-done`, `step-up-done.settings`, `legacy-mail`) and the extra `verification.link.*` keys (`to-login`, `continue`, `already-confirmed`, `address-change-hint`).
+- Device list (kratos-flow 0.11.0): `devices.*` (title, description, „Dieses Gerät“, „Abmelden“, „Überall sonst abmelden“, last active, empty, confirm dialogs, error).
+- Name fields for the coming schema: labels `property.salutation` („Anrede“), `property.title` („Titel“), `property.nickname` („Spitzname“), `property.middle` („2. Vorname“) and the salutation values `property.salutation.{frau,herr,divers,keine-angabe}` („Frau“, „Herr“, „Divers“, „keine Angabe“); `settings.profile.name.required` („Bitte trag Vor- und Nachnamen ein.“ / Sie form). First and last name stay required.
+- Texts that clients keep in their own code move here: flow page titles (`flow.title.*`), the return page of the social sign-in in the app (`oidc-return.*`), sign-in end texts (`signin.end.*`), logout confirmation (`logout.confirm.*`) and „signed out elsewhere“ (`logout.signed-out-elsewhere`), `flow.unavailable`, the Hub passkey offer (`passkey-prompt.*`), the Leinerstift callback page (`callback.*`), the redirect texts (`flow.redirect.*`, `verification.redirect.*`). Both forms are complete. Clients switch to the keys in their own packages (wave 3); until then nothing changes for them.
+- `test/renderer-ui-keys.json` lists the keys the renderer will need. Tests: no duplicate key in any catalog file (raw file scan), Sie complete and without Du pronouns, 1070012, fallback, mail link, device and name keys.
+
 ## 0.6.2
 
 - Message 1010015 (send sign-in code, the button in login step 2) in `de-sie.json` now says „Anmeldecode senden“, like `de.json` (Alex, 08.11., answer 2a: step 2 shows „Mit Passwort anmelden“, „Passwort vergessen?“ and „Anmeldecode senden“ everywhere). The text has no address form, so the Sie text equals the Du text; before, the Leinerstift portal showed „Code per E-Mail senden“. Registration (1040006), verification, settings and recovery texts are unchanged.

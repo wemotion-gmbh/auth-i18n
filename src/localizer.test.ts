@@ -92,8 +92,8 @@ describe("createLocalizer - messages", () => {
       "Bitte füllen Sie das Feld „Nachname“ aus.",
     );
     assert.equal(
-      l.message({ ...msg, context: { property: "nickname" } }).text,
-      "Bitte füllen Sie das Feld „nickname“ aus.",
+      l.message({ ...msg, context: { property: "hobby" } }).text,
+      "Bitte füllen Sie das Feld „hobby“ aus.",
     );
   });
 
