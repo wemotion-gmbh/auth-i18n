@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0
+
+- Account step (an identity from another service arrives at a tenant without an account there): `settings.consent.account.{title,hint,decline,declined,pending,retry}` (Du and Sie; `{brand}` is the tenant's brand, a new placeholder next to `{displayName}` of `sso.account.register.text`). The submit button and the consent sentence reuse `sso.account.register.submit` and `sso.account.register.consent.*`, the name hint `sso.account.register.name-hint`.
+- Refusal without the "continue as" loop, one text per reason: `login.refused.{not-linked,inactive,blocked,unknown}` (all with `{brand}`), `login.refused.support` (`{support}` is the link, link text `login.refused.support-link`) and `login.refused.unreachable` (Kratos not reachable).
+- Message ids 4100012 to 4100015 in `de.json`, `de-sie.json`, `en.json`: 4100012 (provider linked) is neutral and no longer speaks of a "canou account" (placeholder `{provider}`); 4100013 name required, 4100014 no account can be created here, 4100015 consent tick required (same sentence as `sso.account.register.consent.required`).
+- `test/renderer-ui-keys.json` lists the new `settings.consent.account.*` keys; tests pin the new texts, Du/Sie parity and the shared sentences.
+
 ## 0.7.0
 
 - The fallback texts of kratos-flow 0.10.6 (`src/react/fallback-texts.ts`) now live in the catalog, Du and Sie, so that the renderer no longer needs its own copy: `registration.step.traits.new-account`, `registration.step.code.subtitle-new-account`, `login.step.link.code-hint`, `verification.link.*` (title, confirm hint and button, code hint and label, invalid), `settings.consent.*` and `settings.step-up.*` (24 keys). `login.link.code-sent` and the message ids 4100008 to 4100011 were already here and are not repeated.

@@ -163,6 +163,10 @@
   "4100009": "The address change has expired or was replaced by a newer one. Please start it again.",
   "4100010": "This address already belongs to an account.",
   "4100011": "Please use your Google address or sign up with a code.",
+  "4100012": "{provider} is now connected to the existing sign-in of this e-mail address. Please sign in with {provider} once more.",
+  "4100013": "Please enter your first and last name.",
+  "4100014": "No account can be created here with this sign-in right now. Please contact support.",
+  "4100015": "Please tick the box to create your account.",
   "5000001": "{reason}",
   "5000002": "No authentication methods are available. Please contact the system administrator.",
   "5000003": "Your organization requires SSO authentication, but no SSO provider is configured. Please contact the system administrator."
