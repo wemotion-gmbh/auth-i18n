@@ -1310,8 +1310,17 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     }
     for (const catalog of [uiDe, uiDeSie]) assert.ok(catalog["login.refused.support"]!.includes("{support}"));
     // The renderer reads the account step keys; the submit label is the registration's (reused, not duplicated).
-    for (const key of keys.filter((k) => k.startsWith("settings.consent.account."))) assert.ok(rendererKeys.includes(key), key);
+    for (const key of keys.filter((k) => k.startsWith("settings.consent.account.") && k !== "settings.consent.account.registering")) assert.ok(rendererKeys.includes(key), key);
     assert.ok(rendererKeys.includes("sso.account.register.submit"));
+  });
+
+  it("has the registration grace text (0.8.1) in Du and Sie, a host text outside the renderer keys", () => {
+    const key = "settings.consent.account.registering";
+    assert.equal(uiDe[key], "Deine Anmeldung wird gerade eingerichtet. Einen Moment bitte.");
+    assert.equal(uiDeSie[key], "Ihre Anmeldung wird gerade eingerichtet. Einen Moment bitte.");
+    assert.ok(!DU_PRONOUN.test(uiDeSie[key]!), "sie form has no Du pronoun");
+    assert.ok(SIE_FORM.test(uiDeSie[key]!) && !SIE_FORM.test(uiDe[key]!));
+    assert.ok(!rendererKeys.includes(key), "kratos-flow does not read it");
   });
 
   it("has the message ids of plan appendix A in the Sie and Du form (0.4.0)", () => {
