@@ -1283,6 +1283,37 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.doesNotMatch(en5, /sign in again|log in again/i);
   });
 
+  it("has the account step texts (0.8.0): neutral 4100012, 4100013-4100015, account and refusal keys, Du and Sie", () => {
+    const en = readJson<Record<string, string>>("../locales/en.json");
+    for (const [name, catalog] of Object.entries({ de, "de-sie": deSie, en })) {
+      for (const id of ["4100012", "4100013", "4100014", "4100015"]) assert.ok(catalog[id]?.trim(), `${name}:${id}`);
+      assert.ok(catalog["4100012"]!.includes("{provider}"), `${name}:4100012 placeholder`);
+      assert.doesNotMatch(catalog["4100012"]!, /canou-Konto|canou account/i, `${name}:4100012`);
+    }
+    // 4100015 is the sentence of the registration consent; 4100013/4100014 speak in the catalog's form.
+    assert.equal(de["4100015"], uiDe["sso.account.register.consent.required"]);
+    assert.equal(deSie["4100015"], uiDeSie["sso.account.register.consent.required"]);
+    for (const id of ["4100012", "4100013", "4100014"]) {
+      assert.ok(SIE_FORM.test(deSie[id]!), `de-sie:${id}`);
+      assert.ok(!SIE_FORM.test(de[id]!), `de:${id}`);
+    }
+    const keys = Object.keys(uiDe).filter((key) => key.startsWith("settings.consent.account.") || key.startsWith("login.refused."));
+    assert.ok(keys.length >= 13);
+    assert.deepEqual(keys.filter((key) => !uiDeSie[key]?.trim() || !uiDe[key]?.trim()), []);
+    for (const key of ["title", "hint", "declined", "pending"]) {
+      for (const catalog of [uiDe, uiDeSie]) assert.ok(catalog[`settings.consent.account.${key}`]!.includes("{brand}"), key);
+    }
+    for (const key of ["not-linked", "inactive", "blocked", "unknown"]) {
+      for (const catalog of [uiDe, uiDeSie]) assert.ok(catalog[`login.refused.${key}`]!.includes("{brand}"), key);
+      assert.ok(SIE_FORM.test(uiDeSie[`login.refused.${key}`]!) || !DU_PRONOUN.test(uiDeSie[`login.refused.${key}`]!), key);
+      assert.ok(!SIE_FORM.test(uiDe[`login.refused.${key}`]!), key);
+    }
+    for (const catalog of [uiDe, uiDeSie]) assert.ok(catalog["login.refused.support"]!.includes("{support}"));
+    // The renderer reads the account step keys; the submit label is the registration's (reused, not duplicated).
+    for (const key of keys.filter((k) => k.startsWith("settings.consent.account."))) assert.ok(rendererKeys.includes(key), key);
+    assert.ok(rendererKeys.includes("sso.account.register.submit"));
+  });
+
   it("has the message ids of plan appendix A in the Sie and Du form (0.4.0)", () => {
     const en = readJson<Record<string, string>>("../locales/en.json");
     for (const id of ["4100008", "4100009", "4100010", "4100011"]) {

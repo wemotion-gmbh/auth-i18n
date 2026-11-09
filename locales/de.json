@@ -163,6 +163,10 @@
   "4100009": "Die Adressänderung ist abgelaufen oder wurde durch eine neuere ersetzt. Bitte starte sie neu.",
   "4100010": "Diese Adresse gehört schon zu einem Konto.",
   "4100011": "Bitte verwende die Google-Adresse oder registriere dich mit einem Code.",
+  "4100012": "{provider} ist jetzt mit der bestehenden Anmeldung deiner E-Mail-Adresse verbunden. Bitte melde dich noch einmal mit {provider} an.",
+  "4100013": "Bitte trag deinen Vor- und Nachnamen ein.",
+  "4100014": "Mit dieser Anmeldung kann hier gerade kein Konto angelegt werden. Bitte wende dich an den Support.",
+  "4100015": "Bitte setze das Häkchen, um dein Konto anzulegen.",
   "5000001": "{reason}",
   "5000002": "Es sind keine Authentifizierungsmethoden verfügbar. Bitte wende dich an die Systemadministration.",
   "5000003": "Deine Organisation erfordert eine SSO-Anmeldung, aber es ist kein SSO-Anbieter konfiguriert. Bitte wende dich an die Systemadministration."
