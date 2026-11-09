@@ -452,6 +452,7 @@
   "settings.consent.account.declined": "Ohne Zustimmung zum Datenschutz kann {brand} nicht genutzt werden. Deine Anmeldung bei anderen Diensten bleibt unverändert.",
   "settings.consent.account.pending": "Dein Konto bei {brand} wird gerade angelegt. Bitte versuch es gleich noch einmal.",
   "settings.consent.account.retry": "Erneut versuchen",
+  "settings.consent.account.registering": "Deine Anmeldung wird gerade eingerichtet. Einen Moment bitte.",
   "login.refused.not-linked": "Mit dieser Anmeldung hast du bei {brand} noch kein Konto. Wir haben dich wieder abgemeldet. Bitte melde dich mit einem anderen Konto an.",
   "login.refused.inactive": "Dein Konto bei {brand} ist deaktiviert. Bitte wende dich an deine Organisation.",
   "login.refused.blocked": "Für diese E-Mail-Adresse gibt es bei {brand} schon ein anderes Konto. Bitte wende dich an den Support.",

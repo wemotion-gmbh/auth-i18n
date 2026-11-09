@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.1
+
+- New host text `settings.consent.account.registering` (Du: „Deine Anmeldung wird gerade eingerichtet. Einen Moment bitte.“, Sie: „Ihre Anmeldung wird gerade eingerichtet. Einen Moment bitte.“). App, Hub and Leinerstift show it while fusion's registration event after a fresh sign-up is still open, instead of signing the person out. kratos-flow does not read it, so it is not in `test/renderer-ui-keys.json`. 0.8.0 was released without it.
+
 ## 0.8.0
 
 - Account step (an identity from another service arrives at a tenant without an account there): `settings.consent.account.{title,hint,decline,declined,pending,retry}` (Du and Sie; `{brand}` is the tenant's brand, a new placeholder next to `{displayName}` of `sso.account.register.text`). The submit button and the consent sentence reuse `sso.account.register.submit` and `sso.account.register.consent.*`, the name hint `sso.account.register.name-hint`.
