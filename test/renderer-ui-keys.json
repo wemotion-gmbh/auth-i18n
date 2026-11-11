@@ -383,6 +383,7 @@
     "verification.link.confirm-hint",
     "verification.link.continue",
     "verification.link.invalid",
+    "verification.link.request-new",
     "verification.link.title",
     "verification.link.to-login",
     "verification.step.code.subtitle",

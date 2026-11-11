@@ -1268,7 +1268,10 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.ok(deSie["4100001"]!.includes(`„${uiDeSie["email-change.open"]}“`));
     assert.ok(de["4100001"]!.includes(`„${uiDe["email-change.open"]}“`));
     assert.ok(SIE_FORM.test(deSie["4100001"]!) && DU_PRONOUN.test(de["4100001"]!));
-    assert.match(deSie["4100002"]!, /Code per E-Mail/);
+    assert.match(deSie["4100002"]!, /Code, Google oder Microsoft/);
+    assert.match(deSie["4100002"]!, /Passwort und Passkey richten Sie danach in den Einstellungen ein/);
+    assert.match(de["4100002"]!, /Passwort und Passkey richtest du danach in den Einstellungen ein/);
+    assert.doesNotMatch(catalogsById.en["4100002"]!, /not possible/);
     // 4100005: a clean login changes a first factor (a new sign-in method or the password) without a confirmed link.
     assert.ok(SIE_FORM.test(deSie["4100005"]!) && DU_PRONOUN.test(de["4100005"]!) && !SIE_FORM.test(de["4100005"]!));
     // 0.4.1: only "a fresh e-mail code is needed" (fusion KratosSettings TEXT_FRESH_CODE), never "sign in again".
@@ -1312,6 +1315,13 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     // The renderer reads the account step keys; the submit label is the registration's (reused, not duplicated).
     for (const key of keys.filter((k) => k.startsWith("settings.consent.account.") && k !== "settings.consent.account.registering")) assert.ok(rendererKeys.includes(key), key);
     assert.ok(rendererKeys.includes("sso.account.register.submit"));
+  });
+
+  it("has the request-new button for a spent verification link (0.9.0) in Du and Sie", () => {
+    assert.equal(uiDe["verification.link.request-new"], "Neuen Code anfordern");
+    assert.equal(uiDeSie["verification.link.request-new"], "Neuen Code anfordern");
+    assert.match(uiDe["code-link.expired"]!, /abgelaufen oder wurde schon benutzt/);
+    assert.match(uiDeSie["code-link.expired"]!, /abgelaufen oder wurde schon benutzt/);
   });
 
   it("has the registration grace text (0.8.1) in Du and Sie, a host text outside the renderer keys", () => {

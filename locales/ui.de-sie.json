@@ -486,6 +486,7 @@
   "verification.link.to-login": "Zur Anmeldung",
   "verification.link.continue": "Weiter",
   "verification.link.already-confirmed": "Ihre E-Mail-Adresse ist schon bestätigt.",
+  "verification.link.request-new": "Neuen Code anfordern",
   "verification.link.address-change-hint": "Geben Sie diesen Code dort ein, wo Sie die Adressänderung gestartet haben. Dieses Fenster kann ihn nicht bestätigen.",
   "devices.title": "Angemeldete Geräte",
   "devices.description": "Hier sehen Sie, wo Sie angemeldet sind. Melden Sie sich an Geräten ab, die Sie nicht mehr nutzen.",

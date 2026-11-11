@@ -155,7 +155,7 @@
   "4070005": "The interaction expired. Please try again.",
   "4070006": "The verification code is invalid or has already been used. Please try again.",
   "4100001": "Change your e-mail address with “Change e-mail address”.",
-  "4100002": "Signing up with a password is not possible right now. Please sign up with a code by e-mail.",
+  "4100002": "Sign up with a code, Google or Microsoft. You set up a password and passkey afterwards in the settings.",
   "4100003": "That did not work right now. Please try again in a few minutes.",
   "4100004": "Please confirm your e-mail address first.",
   "4100005": "For your security we need a fresh code from your e-mail for this, no older than 15 minutes. If you use a second factor, we need that as well.",
