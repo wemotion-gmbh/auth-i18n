@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2 (unreleased)
+
+- `settings.profile.email.hint` and `.hint-more` (Du and Sie) no longer end with „Entfernst du die neue Adresse wieder, bricht die Änderung ab.“ / „Entfernen Sie die neue Adresse wieder, …“. fusion can cancel a pending change when `traits.email_pending` is removed, but no client offers that: kratos-flow hides the field in every layout, so the sentence promised a way nobody can see. Found in the review of canou-app#99. Same keys, no new ones.
+
 ## 0.9.1
 
 - The address-change texts (`settings.profile.email.dialog.text`, `.hint`, `.hint-more`, `.hint-short`, Du and Sie) described the old behaviour („gilt sofort“, „sperrt dich aus“). They now match fusion settings_v3: the code goes to the new address only, the new address applies to the account (all connected services) only after the code is entered, until then sign-in and recovery stay with the old address, and a typo only means the code does not arrive. Found while building leinerstift-lernplattform#117. Same keys, no new ones.
