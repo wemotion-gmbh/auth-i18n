@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 (unreleased)
+## 0.9.0
 
 - Message 4100002 (password sign-up refused by fusion) now says what works instead (issue #15, plan Kratos-nativ appendix A): „Registriere dich mit Code, Google oder Microsoft. Passwort und Passkey richtest du danach in den Einstellungen ein.“ (Sie form and English analogous). The old text said "not possible right now".
 - New UI key `verification.link.request-new` („Neuen Code anfordern“, same in Du and Sie), the button on the page of a spent verification link. kratos-flow 0.12.2 ships it as a fallback text (`src/react/fallback-texts.ts`); it can drop the fallback once it requires this version. The text for a spent or used link („Dieser Code ist abgelaufen oder wurde schon benutzt. …“) is the existing `code-link.expired`, nothing new. `test/renderer-ui-keys.json` lists the new key.
