@@ -176,9 +176,26 @@ const isBaseId = (id: string) => id.endsWith("0000");
 
 /**
  * IDs whose Kratos text is only `{reason}` (or embeds it). `reason` is free Kratos English,
- * so the Sie catalog has its own text without the placeholder (plan §3.4).
+ * so the Sie catalog has its own text without the placeholder (plan §3.4), and since 0.9.3
+ * the Du catalog too (auth-i18n#31).
  */
 const REASON_IDS = new Set(["4000001", "4000005", "5000001"]);
+
+/**
+ * Validation messages whose Du text was literal Kratos (">=", "war aber", "const
+ * fehlgeschlagen", lowercase fragments) or the English `{reason}` until 0.9.2. Since 0.9.3
+ * (auth-i18n#31) they say the same as the Sie text, in Du form where the Sie text
+ * addresses the reader and word for word where it does not.
+ */
+const VALIDATION_IDS = [
+  "4000001", "4000002", "4000003", "4000004", "4000005", "4000007", "4000017", "4000018", "4000019",
+  "4000020", "4000021", "4000022", "4000023", "4000024", "4000025", "4000026", "4000027",
+  "4000028", "4000029", "4000030", "4000032", "4000033", "4000036", "4000040", "4000041",
+  "5000001",
+];
+
+/** Literal Kratos notation that has no place in a German message text. */
+const TECHNICAL_NOTATION = /[<>]=?|war aber|const\b|\bFlow\b|Social-/u;
 
 /** Placeholder names; `{used_at, date, long}` counts as `used_at`. */
 const placeholders = (text: string) =>
@@ -198,6 +215,8 @@ const DU_IMPERATIVE = word(
     "nutze", "füge", "sende", "gehe",
     // Imperatives of the purpose-code texts (0.3.0).
     "öffne", "fordere", "lass", "sieh", "geh", "registriere", "ignoriere",
+    // 0.9.3: 4000002 in Du („Bitte füll das Feld … aus.“).
+    "füll", "fülle",
     // -e forms of the stems above. "prüfe" only before a word, because "Prüfe…" is a
     // first-person progress label; "versuche" only before "es", because "Versuche" is
     // also the plural noun ("Zu viele Versuche").
@@ -264,22 +283,81 @@ describe("de-sie message catalog", () => {
     assert.deepEqual(Object.entries(deSie).filter(([, t]) => t.trim() === "").map(([k]) => k), []);
   });
 
-  it("uses the same placeholders as de.json, except the reason IDs", () => {
-    const diff = Object.keys(de)
-      .filter((id) => !REASON_IDS.has(id))
-      .filter((id) => placeholders(de[id]!).join(",") !== placeholders(deSie[id]!).join(","));
+  it("uses the same placeholders as de.json, the reason IDs included (0.9.3)", () => {
+    const diff = Object.keys(de).filter((id) => placeholders(de[id]!).join(",") !== placeholders(deSie[id]!).join(","));
     assert.deepEqual(diff, []);
   });
 
-  it("never shows Kratos' English reason", () => {
+  it("never shows Kratos' English reason, in de-sie and (0.9.3) in de", () => {
     for (const id of REASON_IDS) {
-      assert.ok(placeholders(de[id]!).includes("reason"), `de.json ${id} should carry {reason}`);
+      // The list really names the reason IDs of the pinned Kratos version.
+      assert.match(kratosIds.ids[id]!, /Generic$/, `${id} is no generic Kratos message`);
       assert.ok(!placeholders(deSie[id]!).includes("reason"), `de-sie ${id} must not carry {reason}`);
+      assert.ok(!placeholders(de[id]!).includes("reason"), `de ${id} must not carry {reason}`);
+    }
+    // No other ID passes the reason through either.
+    for (const [name, catalog] of [["de", de], ["de-sie", deSie]] as const) {
+      assert.deepEqual(Object.keys(catalog).filter((id) => placeholders(catalog[id]!).includes("reason")), [], name);
     }
   });
 
   it("puts the field label into 4000002 without a case problem", () => {
     assert.equal(deSie["4000002"], "Bitte füllen Sie das Feld „{property}“ aus.");
+  });
+});
+
+describe("validation messages in Du and Sie (0.9.3, auth-i18n#31)", () => {
+  const VALIDATION_RANGE = (id: string) => id.startsWith("4000") || REASON_IDS.has(id);
+
+  it("checks the Du catalog for the same IDs as the Sie catalog", () => {
+    for (const id of VALIDATION_IDS) {
+      assert.ok(de[id] && deSie[id], id);
+      assert.equal(placeholders(de[id]!).join(","), placeholders(deSie[id]!).join(","), id);
+      if (SIE_FORM.test(deSie[id]!)) {
+        // The Sie text addresses the reader: the Du text says the same in Du form.
+        assert.ok(!SIE_FORM.test(de[id]!), `de ${id} uses the Sie form`);
+        assert.ok(DU_PRONOUN.test(de[id]!) || DU_IMPERATIVE.test(de[id]!), `de ${id} is not in Du form: ${de[id]}`);
+      } else {
+        // The Sie text addresses no one: both forms are the same sentence.
+        assert.equal(de[id], deSie[id], id);
+      }
+    }
+  });
+
+  it("has no literal Kratos notation in any validation message, Du or Sie", () => {
+    for (const [name, catalog] of [["de", de], ["de-sie", deSie]] as const) {
+      const hits = Object.keys(catalog).filter(VALIDATION_RANGE).filter((id) => TECHNICAL_NOTATION.test(catalog[id]!));
+      assert.deepEqual(hits, [], name);
+    }
+    // Self-test against the 0.9.2 texts.
+    for (const old of ["Die Länge muss <= {max_length} sein, war aber {actual_length}.", "const fehlgeschlagen", "muss >= {minimum} sein, war aber {actual}."]) {
+      assert.ok(TECHNICAL_NOTATION.test(old), old);
+    }
+  });
+
+  it("writes every validation message as a sentence, Du or Sie", () => {
+    for (const [name, catalog] of [["de", de], ["de-sie", deSie]] as const) {
+      const fragments = Object.keys(catalog)
+        .filter(VALIDATION_RANGE)
+        .filter((id) => !/^(?:\p{Lu}|\{)/u.test(catalog[id]!) || !/[.?!]$/u.test(catalog[id]!));
+      assert.deepEqual(fragments, [], name);
+    }
+  });
+
+  it("pins the Du texts of the issue (4000001, 4000003, 4000017, 4000005, 5000001)", () => {
+    assert.equal(de["4000001"], "Die Eingabe ist ungültig. Bitte prüf deine Angaben und versuch es erneut.");
+    assert.equal(de["4000003"], "Bitte gib mindestens {min_length} Zeichen ein (bisher {actual_length}).");
+    assert.equal(de["4000017"], "Bitte gib höchstens {max_length} Zeichen ein (bisher {actual_length}).");
+    assert.equal(de["4000005"], "Dieses Passwort kann nicht verwendet werden. Bitte wähl ein anderes Passwort.");
+    assert.equal(de["5000001"], "Es ist ein unerwarteter Fehler aufgetreten. Bitte versuch es später erneut.");
+  });
+
+  it("says 4000002 like the client-side check forms.validation.required, in both forms", () => {
+    // Before 0.9.3 the Du text was „Bitte gib {property} ein und versuch es erneut.“, which
+    // read oddly with some labels („Bitte gib Datenschutz ein …“, kratos-flow#31).
+    assert.equal(de["4000002"], "Bitte füll das Feld „{property}“ aus.");
+    assert.equal(de["4000002"], uiDe["forms.validation.required"]);
+    assert.equal(deSie["4000002"], uiDeSie["forms.validation.required"]);
   });
 });
 
@@ -323,6 +401,7 @@ describe("Sie-form checker", () => {
       "Bestätigt. Geh zurück in die App.",
       "Bitte registriere dich noch einmal.",
       "Ignoriere diese Mail.",
+      "Bitte füll das Feld „Vorname“ aus.",
     ]) {
       assert.ok(DU_IMPERATIVE.test(du), `checker misses: ${du}`);
     }
@@ -340,6 +419,7 @@ describe("Sie-form checker", () => {
       "Bestätigt. Gehen Sie zurück in die App.",
       "Bitte registrieren Sie sich noch einmal.",
       "Ignorieren Sie diese Mail.",
+      "Bitte füllen Sie das Feld „Vorname“ aus.",
     ]) {
       assert.ok(!DU_IMPERATIVE.test(neutral), `false positive: ${neutral}`);
     }
@@ -1331,6 +1411,20 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.equal(uiDeSie["verification.link.request-new"], "Neuen Code anfordern");
     assert.match(uiDe["code-link.expired"]!, /abgelaufen oder wurde schon benutzt/);
     assert.match(uiDeSie["code-link.expired"]!, /abgelaufen oder wurde schon benutzt/);
+  });
+
+  it("has the spent-code text for a signed-in reader (0.9.3, kratos-flow#63) in Du and Sie", () => {
+    const key = "code-link.expired-signed-in";
+    assert.equal(uiDe[key], "Dieser Code ist abgelaufen oder wurde schon benutzt. Melde dich ab, um einen neuen Code anzufordern.");
+    assert.equal(uiDeSie[key], "Dieser Code ist abgelaufen oder wurde schon benutzt. Melden Sie sich ab, um einen neuen Code anzufordern.");
+    // Same reason sentence as code-link.expired; only the way out differs (no form follows).
+    for (const catalog of [uiDe, uiDeSie]) {
+      assert.equal(catalog[key]!.split(". ")[0], catalog["code-link.expired"]!.split(". ")[0]);
+      assert.deepEqual(placeholders(catalog[key]!), []);
+    }
+    assert.ok(!DU_PRONOUN.test(uiDeSie[key]!) && !DU_IMPERATIVE.test(uiDeSie[key]!), "Sie text in Du form");
+    assert.ok(!SIE_FORM.test(uiDe[key]!), "Du text in Sie form");
+    assert.ok(rendererKeys.includes(key), "kratos-flow reads it");
   });
 
   it("has the registration grace text (0.8.1) in Du and Sie, a host text outside the renderer keys", () => {

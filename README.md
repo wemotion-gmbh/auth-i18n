@@ -121,7 +121,7 @@ t.provider("google"); // -> "Google"
 
 ### Tests
 
-`npm test` (Node >= 22.15, no install needed) checks: parity `de.json` -> `de-sie.json`, coverage of the Kratos ID list, placeholders, Sie form (no Du pronouns/imperatives, no "Moin"; the checker has a self-test against `de.json`), real umlauts, identical keys in both UI catalogs and the renderer key list (`test/renderer-ui-keys.json`), and the localizer. `test/register.mjs` only lets Node load the bundler-style source (extensionless imports, JSON without import attributes).
+`npm test` (Node >= 22.15, no install needed) checks: parity `de.json` -> `de-sie.json`, coverage of the Kratos ID list, placeholders, the validation messages of both forms (no `{reason}`, no literal Kratos notation, Du says what Sie says; 0.9.3), Sie form (no Du pronouns/imperatives, no "Moin"; the checker has a self-test against `de.json`), real umlauts, identical keys in both UI catalogs and the renderer key list (`test/renderer-ui-keys.json`), and the localizer. `test/register.mjs` only lets Node load the bundler-style source (extensionless imports, JSON without import attributes).
 
 Regenerate the Kratos ID list for a new Kratos version:
 

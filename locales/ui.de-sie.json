@@ -475,6 +475,7 @@
   "code-link.other-place.hint": "Diesen Code haben Sie in einem anderen Browser, einer anderen App oder auf einem anderen Gerät angefordert. Geben Sie ihn dort ein:",
   "code-link.app.hint": "Diesen Code haben Sie in der App angefordert. Öffnen Sie die App und geben Sie ihn dort ein:",
   "code-link.expired": "Dieser Code ist abgelaufen oder wurde schon benutzt. Fordern Sie hier einen neuen an.",
+  "code-link.expired-signed-in": "Dieser Code ist abgelaufen oder wurde schon benutzt. Melden Sie sich ab, um einen neuen Code anzufordern.",
   "code-link.done-elsewhere": "Erledigt. Der Code wurde in Ihrem anderen Fenster übernommen. Sie können dieses Fenster schließen.",
   "code-link.continue": "Hier weiter",
   "code-link.restart.login": "Oder hier neu anmelden",
