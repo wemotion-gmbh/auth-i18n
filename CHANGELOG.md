@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1 (unreleased)
+
+- The address-change texts (`settings.profile.email.dialog.text`, `.hint`, `.hint-more`, `.hint-short`, Du and Sie) described the old behaviour („gilt sofort“, „sperrt dich aus“). They now match fusion settings_v3: the code goes to the new address only, the new address applies to the account (all connected services) only after the code is entered, until then sign-in and recovery stay with the old address, and a typo only means the code does not arrive. Found while building leinerstift-lernplattform#117. Same keys, no new ones.
+
 ## 0.9.0
 
 - Message 4100002 (password sign-up refused by fusion) now says what works instead (issue #15, plan Kratos-nativ appendix A): „Registriere dich mit Code, Google oder Microsoft. Passwort und Passkey richtest du danach in den Einstellungen ein.“ (Sie form and English analogous). The old text said "not possible right now".
