@@ -158,7 +158,7 @@
   "4070005": "Der Vorgang ist abgelaufen. Bitte versuchen Sie es erneut.",
   "4070006": "Der Bestätigungscode ist ungültig oder wurde bereits verwendet. Bitte versuchen Sie es erneut.",
   "4100001": "Ihre E-Mail-Adresse ändern Sie über „E-Mail-Adresse ändern“.",
-  "4100002": "Die Registrierung mit Passwort ist gerade nicht möglich. Bitte registrieren Sie sich mit einem Code per E-Mail.",
+  "4100002": "Registrieren Sie sich mit Code, Google oder Microsoft. Passwort und Passkey richten Sie danach in den Einstellungen ein.",
   "4100003": "Das hat gerade nicht geklappt. Bitte versuchen Sie es in ein paar Minuten noch einmal.",
   "4100004": "Bitte bestätigen Sie zuerst Ihre E-Mail-Adresse.",
   "4100005": "Zur Sicherheit brauchen wir dafür einen frischen Code aus Ihrer E-Mail, der höchstens 15 Minuten alt ist. Bei einem zweiten Faktor brauchen Sie auch diesen.",
