@@ -476,29 +476,38 @@ describe("settings e-mail change (plan §6.9, S16)", () => {
     }
   });
 
-  it("says what a change does: all connected services, code to the new address, old address dead at once, typo locks out code-only logins", () => {
+  it("says what a change does: code to the new address, new address applies only after the code, old address stays sign-in and recovery until then", () => {
     const parts = [
-      // S16 and §6.9 "Wirkung auf die drei Mandanten": every tenant takes the new address at once.
+      "Code an die neue Adresse",
+      "Erst wenn",
       "allen verbundenen Diensten",
       "E-Mails zu Buchungen und Rechnungen",
-      "Code an die neue Adresse",
-      "alte Adresse gilt sofort nicht mehr",
-      "Anmeldung",
-      // Only code-by-e-mail logins are locked out; passkey and social logins do not depend on the address.
-      "nur mit einem Code per E-Mail",
+      "bleibt die alte Adresse für die Anmeldung und die Wiederherstellung",
+      // A typo only means the code does not arrive; the old address keeps working.
       "Tippfehler",
+      "kein Code an",
+      "alte Adresse funktioniert dann weiter",
     ];
     for (const [name, catalog] of Object.entries(catalogs)) {
       const hint = catalog[HINT]!;
       for (const part of parts) {
         assert.ok(hint.includes(part), `${name}:${HINT} lacks „${part}“`);
       }
-      // The locked-out accounts have no password, so the hint must not talk about one.
       assert.ok(!hint.includes("Passwort"), `${name}:${HINT} mentions a password`);
-      assert.ok(catalog[DIALOG_TEXT]!.includes("alte Adresse gilt danach sofort nicht mehr"), `${name}:${DIALOG_TEXT}`);
+      const dialog = catalog[DIALOG_TEXT]!;
+      assert.ok(dialog.includes("Erst wenn"), `${name}:${DIALOG_TEXT}`);
+      assert.ok(dialog.includes("alte Adresse für Anmeldung und Wiederherstellung gültig"), `${name}:${DIALOG_TEXT}`);
     }
     assert.ok(uiDe[HINT]!.includes("Wiederherstellung deines Kontos"), "ui.de: recovery of the account");
     assert.ok(uiDeSie[HINT]!.includes("Wiederherstellung Ihres Kontos"), "ui.de-sie: recovery of the account");
+  });
+
+  it("no longer claims the old behaviour (immediate switch, lock-out, re-login)", () => {
+    for (const [name, catalog] of Object.entries(catalogs)) {
+      for (const key of [...EMAIL_CHANGE_KEYS, "settings.profile.email.hint-short", "settings.profile.email.hint-more"]) {
+        assert.doesNotMatch(catalog[key]!, /gilt sofort|sofort nicht mehr|sperrt|neu anmelden|danach sofort/, `${name}:${key}`);
+      }
+    }
   });
 });
 
@@ -739,13 +748,13 @@ describe("settings overview: groups, rows, status and buttons (kratos-flow 0.4.0
     for (const [name, catalog] of Object.entries(catalogs)) {
       const short = catalog["settings.profile.email.hint-short"]!;
       const more = catalog["settings.profile.email.hint-more"]!;
-      // One sentence: the new address counts at once, the old one stops at once, check it.
+      // One sentence: the code goes to the new address, it applies only with the code, the old one stays until then, check it.
       assert.equal(short.match(/[.!?](?=\s|$)/g)?.length, 1, `${name}: one sentence`);
-      assert.match(short, /neue Adresse gilt sofort/, name);
-      assert.match(short, /alte/, name);
+      assert.match(short, /Code geht an die neue Adresse/, name);
+      assert.match(short, /bis dahin bleibt die alte gültig/, name);
       assert.match(short, /genau/, name);
       // The rest: all connected services, booking and invoice e-mails, a code to the new address,
-      // login and recovery with the old address end, a typo locks out code-only sign-ins.
+      // login and recovery stay with the old address until then, a typo only means no code arrives.
       for (const part of [/allen verbundenen Diensten/, /Buchungen und Rechnungen/, /Code an die neue Adresse/, /Anmeldung/, /Wiederherstellung/, /Tippfehler/]) {
         assert.match(more, part, `${name}: ${part}`);
       }
