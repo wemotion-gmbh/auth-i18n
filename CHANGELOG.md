@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.2 (unreleased)
+## 0.9.2
 
 - `settings.profile.email.hint` and `.hint-more` (Du and Sie) no longer end with „Entfernst du die neue Adresse wieder, bricht die Änderung ab.“ / „Entfernen Sie die neue Adresse wieder, …“. fusion can cancel a pending change when `traits.email_pending` is removed, but no client offers that: kratos-flow hides the field in every layout, so the sentence promised a way nobody can see. Found in the review of canou-app#99. Same keys, no new ones.
 
