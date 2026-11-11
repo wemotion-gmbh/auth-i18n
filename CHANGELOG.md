@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.9.3 — 2026-11-11
+
+- Validation messages in the Du catalog (`de.json`, used by the Hub and the app) now say the same as the Sie catalog, in Du form (auth-i18n#31, hand test 11.11., finding 16-2). Until 0.9.2 they were literal Kratos („Die Länge muss <= 64 sein, war aber 65.“, „const fehlgeschlagen“, lowercase fragments) or Kratos' English `{reason}` (4000001 showed „value must be one of "Frau", "Herr", "Divers"“ for the salutation).
+  - 4000001 „Die Eingabe ist ungültig. Bitte prüf deine Angaben und versuch es erneut.“, 4000005 „Dieses Passwort kann nicht verwendet werden. Bitte wähl ein anderes Passwort.“, 5000001 „Es ist ein unerwarteter Fehler aufgetreten. Bitte versuch es später erneut.“: no `{reason}` any more, as in Sie. 4000001 stays one general sentence because Kratos sends it for more than the enum case (too many codes, a used code), and kratos-flow reads the reason only to tell those apart.
+  - 4000003 „Bitte gib mindestens {min_length} Zeichen ein (bisher {actual_length}).“, 4000017 „Bitte gib höchstens {max_length} Zeichen ein (bisher {actual_length}).“, 4000027, 4000028, 4000040, 4000041 in Du form of the Sie text.
+  - 4000002 „Bitte füll das Feld „{property}“ aus.“, the same sentence as the client-side check `forms.validation.required`. kratos-flow pins the old Du text in two tests (`test/self-service.test.ts`, `test/v0102-core.test.ts`); they change with its bump to 0.9.3.
+  - 4000004, 4000007, 4000018 to 4000026, 4000029, 4000030, 4000032, 4000033, 4000036 address no one and are now word for word the Sie text.
+  - `en.json` keeps `{reason}`: Kratos' reason is English anyway.
+- New UI key `code-link.expired-signed-in` (Du: „Dieser Code ist abgelaufen oder wurde schon benutzt. Melde dich ab, um einen neuen Code anzufordern.“, Sie: „… Melden Sie sich ab, um einen neuen Code anzufordern.“) for kratos-flow#63: a spent mail link opened in a browser that is signed in, where the session notice stands in place of the form. Same reason sentence as `code-link.expired`, only the way out differs. kratos-flow 0.12.3 ships it as a fallback text until it requires this version. `test/renderer-ui-keys.json` lists it.
+- Tests: the Du catalog is checked for the same validation ids as the Sie catalog (same placeholders, word for word where the Sie text is neutral, Du form where it addresses the reader), no `{reason}` and no literal Kratos notation in either form, every validation message a sentence; the localizer test covers the Du form.
+
 ## 0.9.2
 
 - `settings.profile.email.hint` and `.hint-more` (Du and Sie) no longer end with „Entfernst du die neue Adresse wieder, bricht die Änderung ab.“ / „Entfernen Sie die neue Adresse wieder, …“. fusion can cancel a pending change when `traits.email_pending` is removed, but no client offers that: kratos-flow hides the field in every layout, so the sentence promised a way nobody can see. Found in the review of canou-app#99. Same keys, no new ones.

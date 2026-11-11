@@ -97,12 +97,32 @@ describe("createLocalizer - messages", () => {
     );
   });
 
-  it("reason IDs: no Kratos English in de-sie", () => {
-    const l = createLocalizer({ locale: "de-sie" });
-    for (const id of [4000001, 4000005, 5000001]) {
-      const text = l.message({ id, text: "", context: { reason: "some english reason" } }).text;
-      assert.ok(!text.includes("some english reason"), String(id));
+  it("reason IDs: no Kratos English in de-sie and (0.9.3) in de", () => {
+    for (const locale of ["de-sie", "de"] as const) {
+      const l = createLocalizer({ locale });
+      for (const id of [4000001, 4000005, 5000001]) {
+        const text = l.message({ id, text: "", context: { reason: "some english reason" } }).text;
+        assert.ok(!text.includes("some english reason"), `${locale} ${id}`);
+      }
     }
+  });
+
+  it("Du validation messages read as plain German (0.9.3, auth-i18n#31)", () => {
+    const du = createLocalizer({ locale: "de" });
+    // Kratos' enum error on the salutation arrives as 4000001 with an English reason.
+    const reason = 'value must be one of "Frau", "Herr", "Divers"';
+    assert.equal(
+      du.message({ id: 4000001, text: reason, type: "error", context: { reason } }).text,
+      "Die Eingabe ist ungültig. Bitte prüf deine Angaben und versuch es erneut.",
+    );
+    assert.equal(
+      du.message({ id: 4000017, text: "", type: "error", context: { max_length: 64, actual_length: 65 } }).text,
+      "Bitte gib höchstens 64 Zeichen ein (bisher 65).",
+    );
+    assert.equal(
+      du.message({ id: 4000003, text: "", type: "error", context: { min_length: 8, actual_length: 3 } }).text,
+      "Bitte gib mindestens 8 Zeichen ein (bisher 3).",
+    );
   });
 
   it("provider: display name from oidc.provider.<id>, fallback capitalized id", () => {

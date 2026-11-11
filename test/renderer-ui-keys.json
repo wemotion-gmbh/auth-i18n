@@ -8,6 +8,7 @@
     "code-link.continue",
     "code-link.done-elsewhere",
     "code-link.expired",
+    "code-link.expired-signed-in",
     "code-link.legacy-mail",
     "code-link.other-place.hint",
     "code-link.restart.login",
