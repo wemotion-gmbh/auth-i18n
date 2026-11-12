@@ -486,6 +486,7 @@
   "code-link.legacy-mail": "Dieser Link stammt aus einer älteren E-Mail. Fordere hier einen neuen Code an.",
   "verification.link.to-login": "Zur Anmeldung",
   "verification.link.continue": "Weiter",
+  "verification.link.later": "Später bestätigen",
   "verification.link.already-confirmed": "Deine E-Mail-Adresse ist schon bestätigt.",
   "verification.link.request-new": "Neuen Code anfordern",
   "verification.link.address-change-hint": "Gib diesen Code dort ein, wo du die Adressänderung gestartet hast. Dieses Fenster kann ihn nicht bestätigen.",
