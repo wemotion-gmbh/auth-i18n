@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.4 — 2026-11-12
+
+- New UI key `verification.link.later` („Später bestätigen“, same in Du and Sie) for kratos-flow#70: on the address and code steps of a signed-in user, the way back that leaves the page without confirming must not read „Weiter“ (the code step's submit button, Kratos 1070009, is also „Weiter“). `verification.link.continue` stays as it was. There is no English UI catalog (`en.json` holds Kratos messages only), so the key exists in `ui.de.json` and `ui.de-sie.json`. `test/renderer-ui-keys.json` lists it.
+- Tests: the key is checked in both UI catalogs, differs from `verification.link.continue` and is in the renderer key list.
+
 ## 0.9.3 — 2026-11-11
 
 - Validation messages in the Du catalog (`de.json`, used by the Hub and the app) now say the same as the Sie catalog, in Du form (auth-i18n#31, hand test 11.11., finding 16-2). Until 0.9.2 they were literal Kratos („Die Länge muss <= 64 sein, war aber 65.“, „const fehlgeschlagen“, lowercase fragments) or Kratos' English `{reason}` (4000001 showed „value must be one of "Frau", "Herr", "Divers"“ for the salutation).

@@ -1427,6 +1427,14 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.ok(rendererKeys.includes(key), "kratos-flow reads it");
   });
 
+  it("has the leave-without-confirming label (0.9.4, kratos-flow#70) in Du and Sie, distinct from the Weiter button", () => {
+    const key = "verification.link.later";
+    assert.equal(uiDe[key], "Später bestätigen");
+    assert.equal(uiDeSie[key], "Später bestätigen");
+    for (const catalog of [uiDe, uiDeSie]) assert.notEqual(catalog[key], catalog["verification.link.continue"]);
+    assert.ok(rendererKeys.includes(key), "kratos-flow reads it");
+  });
+
   it("has the registration grace text (0.8.1) in Du and Sie, a host text outside the renderer keys", () => {
     const key = "settings.consent.account.registering";
     assert.equal(uiDe[key], "Deine Anmeldung wird gerade eingerichtet. Einen Moment bitte.");
