@@ -1632,6 +1632,153 @@ describe("0.7.0 catalog hygiene and new keys", () => {
   });
 });
 
+describe("provider errors and the code step-up (0.9.4, kratos-flow#74, #75, #76)", () => {
+  /** The keys that carry the provider's own message (`error_description`), shown as text. */
+  const MESSAGE_KEYS = ["login.oidc.refused", "login.oidc.failed", "settings.oidc.refused", "settings.oidc.failed"];
+  const SPEC: Record<string, { du: string; sie: string }> = {
+    "settings.step-up.code-invalid": {
+      du: "Der Sicherheitscode ist ungültig oder wurde bereits verwendet. Bitte versuch es erneut.",
+      sie: "Der Sicherheitscode ist ungültig oder wurde bereits verwendet. Bitte versuchen Sie es erneut.",
+    },
+    "settings.step-up.code-expired": {
+      du: "Der Code war abgelaufen. Wir haben dir einen neuen geschickt.",
+      sie: "Der Code war abgelaufen. Wir haben Ihnen einen neuen geschickt.",
+    },
+    "login.oidc.cancelled": {
+      du: "Die Anmeldung mit {provider} wurde abgebrochen.",
+      sie: "Die Anmeldung mit {provider} wurde abgebrochen.",
+    },
+    "login.oidc.refused": {
+      du: "{provider} hat deine Anmeldung abgelehnt. Seine Fehlermeldung: {message}",
+      sie: "{provider} hat Ihre Anmeldung abgelehnt. Seine Fehlermeldung: {message}",
+    },
+    "login.oidc.refused.no-message": {
+      du: "{provider} hat deine Anmeldung abgelehnt.",
+      sie: "{provider} hat Ihre Anmeldung abgelehnt.",
+    },
+    "login.oidc.failed": {
+      du: "{provider} hat deine Anmeldung abgelehnt. Seine Fehlermeldung: {message}",
+      sie: "{provider} hat Ihre Anmeldung abgelehnt. Seine Fehlermeldung: {message}",
+    },
+    "login.oidc.failed.no-message": {
+      du: "{provider} hat deine Anmeldung abgelehnt.",
+      sie: "{provider} hat Ihre Anmeldung abgelehnt.",
+    },
+    "settings.oidc.cancelled": {
+      du: "Das Verknüpfen mit {provider} wurde abgebrochen.",
+      sie: "Das Verknüpfen mit {provider} wurde abgebrochen.",
+    },
+    "settings.oidc.refused": {
+      du: "{provider} hat das Verknüpfen abgelehnt. Seine Fehlermeldung: {message}",
+      sie: "{provider} hat das Verknüpfen abgelehnt. Seine Fehlermeldung: {message}",
+    },
+    "settings.oidc.refused.no-message": {
+      du: "{provider} hat das Verknüpfen abgelehnt.",
+      sie: "{provider} hat das Verknüpfen abgelehnt.",
+    },
+    "settings.oidc.failed": {
+      du: "{provider} hat das Verknüpfen abgelehnt. Seine Fehlermeldung: {message}",
+      sie: "{provider} hat das Verknüpfen abgelehnt. Seine Fehlermeldung: {message}",
+    },
+    "settings.oidc.failed.no-message": {
+      du: "{provider} hat das Verknüpfen abgelehnt.",
+      sie: "{provider} hat das Verknüpfen abgelehnt.",
+    },
+    "oidc.provider-unknown": { du: "Google/Microsoft", sie: "Google/Microsoft" },
+  };
+  const keys = Object.keys(SPEC);
+  const uiCatalogs = { "ui.de": uiDe, "ui.de-sie": uiDeSie };
+
+  it("has every new key in Du and Sie with the wording of the issues, and in the renderer key list", () => {
+    for (const key of keys) {
+      assert.equal(uiDe[key], SPEC[key]!.du, `ui.de:${key}`);
+      assert.equal(uiDeSie[key], SPEC[key]!.sie, `ui.de-sie:${key}`);
+      assert.ok(rendererKeys.includes(key), `kratos-flow reads ${key}`);
+    }
+  });
+
+  it("addresses the reader in the catalog's form where the text addresses anyone", () => {
+    for (const key of keys) {
+      assert.ok(!DU_PRONOUN.test(uiDeSie[key]!) && !DU_IMPERATIVE.test(uiDeSie[key]!), `Sie text of ${key} in Du form`);
+      assert.ok(!SIE_FORM.test(uiDe[key]!), `Du text of ${key} in Sie form`);
+    }
+    for (const key of ["settings.step-up.code-invalid", "settings.step-up.code-expired", "login.oidc.refused", "login.oidc.refused.no-message"]) {
+      assert.notEqual(uiDe[key], uiDeSie[key], `${key} addresses the reader, so Du and Sie differ`);
+    }
+  });
+
+  it("puts {message} only into the four message keys, at the end, and {reason} nowhere", () => {
+    for (const [name, catalog] of Object.entries(uiCatalogs)) {
+      const withMessage = Object.keys(catalog).filter((k) => placeholders(catalog[k]!).includes("message"));
+      assert.deepEqual(withMessage.sort(), [...MESSAGE_KEYS].sort(), name);
+      for (const key of MESSAGE_KEYS) {
+        assert.ok(catalog[key]!.endsWith(" Seine Fehlermeldung: {message}"), `${name}:${key}`);
+        assert.equal(catalog[key]!.match(/\{message\}/g)?.length, 1, `${name}:${key} has one {message}`);
+      }
+      assert.deepEqual(Object.keys(catalog).filter((k) => placeholders(catalog[k]!).includes("reason")), [], name);
+    }
+    for (const [name, catalog] of Object.entries({ de, "de-sie": deSie })) {
+      assert.deepEqual(Object.keys(catalog).filter((k) => placeholders(catalog[k]!).includes("message")), [], name);
+    }
+  });
+
+  it("names the provider in every provider error text, and the variant without a message is the first sentence", () => {
+    for (const [name, catalog] of Object.entries(uiCatalogs)) {
+      for (const key of keys.filter((k) => k.includes(".oidc."))) {
+        assert.deepEqual(placeholders(catalog[key]!).filter((p) => p !== "message"), ["provider"], `${name}:${key}`);
+      }
+      for (const key of MESSAGE_KEYS) {
+        assert.equal(catalog[`${key}.no-message`], catalog[key]!.replace(" Seine Fehlermeldung: {message}", ""), `${name}:${key}`);
+      }
+      // Alex 12.11.2026 14:20: refused and failed read the same; the keys exist so the classes can part later.
+      assert.equal(catalog["login.oidc.failed"], catalog["login.oidc.refused"]);
+      assert.equal(catalog["settings.oidc.failed"], catalog["settings.oidc.refused"]);
+      // The cancel texts carry no message: a description from the provider means the message text.
+      for (const key of ["login.oidc.cancelled", "settings.oidc.cancelled"]) assert.match(catalog[key]!, /abgebrochen\.$/, `${name}:${key}`);
+    }
+  });
+
+  it("shows the provider's message exactly as delivered: no own translation of provider errors or AADSTS codes", () => {
+    // Alex 12.11.2026 14:24: „nein, wir übersetzen nicht“.
+    const providerTerms = /AADSTS|access_denied|interaction_required|consent_required|unauthorized_client|error_description/i;
+    for (const [name, catalog] of Object.entries({ ...uiCatalogs, de, "de-sie": deSie, en: kratosIdsEn() })) {
+      assert.deepEqual(Object.keys(catalog).filter((k) => providerTerms.test(k) || providerTerms.test(catalog[k]!)), [], name);
+    }
+    // interpolate replaces the placeholder once and never reads the value again, so braces or markup stay text.
+    const message = "AADSTS5000228: Access to {tenant} is denied. <b>Ask your admin.</b>";
+    assert.equal(
+      interpolate(uiDe["login.oidc.refused"]!, { provider: "Microsoft", message }),
+      `Microsoft hat deine Anmeldung abgelehnt. Seine Fehlermeldung: ${message}`,
+    );
+    assert.equal(
+      interpolate(uiDeSie["settings.oidc.refused"]!, { provider: "Google", message }),
+      `Google hat das Verknüpfen abgelehnt. Seine Fehlermeldung: ${message}`,
+    );
+  });
+
+  it("names the security code in the step-up and keeps the sign-in code and 4000001 unchanged", () => {
+    for (const catalog of [uiDe, uiDeSie]) {
+      assert.match(catalog["settings.step-up.code-invalid"]!, /^Der Sicherheitscode /);
+      assert.doesNotMatch(catalog["settings.step-up.code-invalid"]!, /Anmeldecode/);
+      assert.deepEqual(placeholders(catalog["settings.step-up.code-invalid"]!), []);
+      assert.deepEqual(placeholders(catalog["settings.step-up.code-expired"]!), []);
+    }
+    // The normal code sign-in keeps 4010008; only the step-up maps it to its own key (kratos-flow#74).
+    assert.equal(de["4010008"], "Der Anmeldecode ist ungültig oder wurde bereits verwendet. Bitte versuch es erneut.");
+    assert.equal(deSie["4010008"], "Der Anmeldecode ist ungültig oder wurde bereits verwendet. Bitte versuchen Sie es erneut.");
+    // 4000001 stays the general text for every other case (kratos-flow#75, #76).
+    assert.equal(de["4000001"], "Die Eingabe ist ungültig. Bitte prüf deine Angaben und versuch es erneut.");
+    assert.equal(deSie["4000001"], "Die Eingabe ist ungültig. Bitte prüfen Sie Ihre Angaben und versuchen Sie es erneut.");
+  });
+
+  it("keeps the fallback provider name outside oidc.provider.<id>, so provider() never resolves it", () => {
+    for (const catalog of [uiDe, uiDeSie]) {
+      assert.equal(catalog["oidc.provider-unknown"], catalog["login.oidc.incomplete"]!.match(/mit (\S+) wurde/)?.[1]);
+      assert.ok(!Object.keys(catalog).some((k) => k.startsWith("oidc.provider.") && catalog[k] === "Google/Microsoft"));
+    }
+  });
+});
+
 function kratosIdsEn(): Record<string, string> {
   return readJson<Record<string, string>>("../locales/en.json");
 }
