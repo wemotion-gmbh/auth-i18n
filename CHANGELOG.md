@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.5 — unreleased
+## 0.9.5 — 2026-11-16
 
 - Two new UI keys for kratos-flow#73: the confirmation page of a mail link („E-Mail-Adresse bestätigen“) no longer says „Dieser Code ist abgelaufen oder wurde schon benutzt“ when the code is still good but this browser is signed in differently. It shows a warning and the code, and confirms nothing (Alex, 05.11.2026, kratos-flow#21: „Bestätigen“ only with a session of the same account, otherwise a warning plus the code to type where the change was started; never sent by itself).
   - `verification.link.other-account-hint` (Du: „Dieser Link gehört zu einem anderen Konto als dem, mit dem du hier angemeldet bist. Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:“, Sie: „… mit dem Sie hier angemeldet sind. … Geben Sie den Code dort ein, wo Sie die Änderung gestartet haben:“): kratos-flow could read the flow, and its address belongs to another account than the one signed in here.
