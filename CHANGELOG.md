@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.5 — unreleased
+
+- Two new UI keys for kratos-flow#73: the confirmation page of a mail link („E-Mail-Adresse bestätigen“) no longer says „Dieser Code ist abgelaufen oder wurde schon benutzt“ when the code is still good but this browser is signed in differently. It shows a warning and the code, and confirms nothing (Alex, 05.11.2026, kratos-flow#21: „Bestätigen“ only with a session of the same account, otherwise a warning plus the code to type where the change was started; never sent by itself).
+  - `verification.link.other-account-hint` (Du: „Dieser Link gehört zu einem anderen Konto als dem, mit dem du hier angemeldet bist. Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:“, Sie: „… mit dem Sie hier angemeldet sind. … Geben Sie den Code dort ein, wo Sie die Änderung gestartet haben:“): kratos-flow could read the flow, and its address belongs to another account than the one signed in here.
+  - `verification.link.session-changed-hint` (Du: „Seit dieser Code angefordert wurde, hat sich in diesem Browser die Anmeldung geändert (ein anderes Konto oder eine neue Anmeldung). Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:“, Sie: „… Geben Sie den Code dort ein, wo Sie die Änderung gestartet haben:“): Kratos refuses to show the flow in this browser (403, its CSRF cookie was renewed by a sign-in since), so kratos-flow cannot tell whether the account signed in now is the same one. Hand test M4b (13.11.2026): sign out and sign in again with the same account gives this case, as does another account (finding 17-4).
+  - Both end with a colon like `verification.link.code-hint`: the code follows them. `code-link.expired` stays the text for a link Kratos no longer knows (410, 404) or a flow that waits for no code.
+- `test/renderer-ui-keys.json` lists both keys (kratos-flow 0.12.6). There is still no English UI catalog.
+- Tests: the wording in Du and Sie, the form of address, no placeholder, the colon before the code, and neither „abgelaufen“ nor „benutzt“.
+
 ## 0.9.4 — 2026-11-12
 
 - New UI key `verification.link.later` („Später bestätigen“, same in Du and Sie) for kratos-flow#70: on the address and code steps of a signed-in user, the way back that leaves the page without confirming must not read „Weiter“ (the code step's submit button, Kratos 1070009, is also „Weiter“). `verification.link.continue` stays as it was. There is no English UI catalog (`en.json` holds Kratos messages only), so the key exists in `ui.de.json` and `ui.de-sie.json`. `test/renderer-ui-keys.json` lists it.

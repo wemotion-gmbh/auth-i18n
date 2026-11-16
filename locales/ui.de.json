@@ -503,6 +503,8 @@
   "verification.link.already-confirmed": "Deine E-Mail-Adresse ist schon bestätigt.",
   "verification.link.request-new": "Neuen Code anfordern",
   "verification.link.address-change-hint": "Gib diesen Code dort ein, wo du die Adressänderung gestartet hast. Dieses Fenster kann ihn nicht bestätigen.",
+  "verification.link.other-account-hint": "Dieser Link gehört zu einem anderen Konto als dem, mit dem du hier angemeldet bist. Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:",
+  "verification.link.session-changed-hint": "Seit dieser Code angefordert wurde, hat sich in diesem Browser die Anmeldung geändert (ein anderes Konto oder eine neue Anmeldung). Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:",
   "devices.title": "Angemeldete Geräte",
   "devices.description": "Hier siehst du, wo du angemeldet bist. Melde dich an Geräten ab, die du nicht mehr nutzt.",
   "devices.this-device": "Dieses Gerät",

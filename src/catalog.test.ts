@@ -1435,6 +1435,34 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.ok(rendererKeys.includes(key), "kratos-flow reads it");
   });
 
+  it("has the warnings of a confirmation link under another sign-in (0.9.5, kratos-flow#73) in Du and Sie", () => {
+    const SPEC: Record<string, { du: string; sie: string }> = {
+      "verification.link.other-account-hint": {
+        du: "Dieser Link gehört zu einem anderen Konto als dem, mit dem du hier angemeldet bist. Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:",
+        sie: "Dieser Link gehört zu einem anderen Konto als dem, mit dem Sie hier angemeldet sind. Hier wird nichts bestätigt. Geben Sie den Code dort ein, wo Sie die Änderung gestartet haben:",
+      },
+      "verification.link.session-changed-hint": {
+        du: "Seit dieser Code angefordert wurde, hat sich in diesem Browser die Anmeldung geändert (ein anderes Konto oder eine neue Anmeldung). Hier wird nichts bestätigt. Gib den Code dort ein, wo du die Änderung gestartet hast:",
+        sie: "Seit dieser Code angefordert wurde, hat sich in diesem Browser die Anmeldung geändert (ein anderes Konto oder eine neue Anmeldung). Hier wird nichts bestätigt. Geben Sie den Code dort ein, wo Sie die Änderung gestartet haben:",
+      },
+    };
+    for (const [key, text] of Object.entries(SPEC)) {
+      assert.equal(uiDe[key], text.du, `ui.de:${key}`);
+      assert.equal(uiDeSie[key], text.sie, `ui.de-sie:${key}`);
+      assert.notEqual(uiDe[key], uiDeSie[key], `${key} addresses the reader, so Du and Sie differ`);
+      assert.ok(!DU_PRONOUN.test(uiDeSie[key]!) && !DU_IMPERATIVE.test(uiDeSie[key]!), `Sie text of ${key} in Du form`);
+      assert.ok(!SIE_FORM.test(uiDe[key]!), `Du text of ${key} in Sie form`);
+      for (const catalog of [uiDe, uiDeSie]) {
+        assert.deepEqual(placeholders(catalog[key]!), [], `${key} has no placeholder`);
+        // The code follows the hint, like verification.link.code-hint; the page never says the code is spent.
+        assert.ok(catalog[key]!.endsWith(":"), `${key} leads to the code`);
+        assert.doesNotMatch(catalog[key]!, /abgelaufen|benutzt/);
+        assert.match(catalog[key]!, /Hier wird nichts bestätigt\./);
+      }
+      assert.ok(rendererKeys.includes(key), `kratos-flow reads ${key}`);
+    }
+  });
+
   it("has the registration grace text (0.8.1) in Du and Sie, a host text outside the renderer keys", () => {
     const key = "settings.consent.account.registering";
     assert.equal(uiDe[key], "Deine Anmeldung wird gerade eingerichtet. Einen Moment bitte.");
