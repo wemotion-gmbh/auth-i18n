@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6 — 2026-11-24
+
+- Message id 4100016 in `de.json`, `de-sie.json`, `en.json`: fusion's account step refuses a first or last name on its name blocklist at that field (fusion-api-v3#951). Du „Bitte gib deinen echten Namen ein.“ (the sentence fusion's other forms answer with), Sie „Bitte geben Sie Ihren echten Namen ein.“, en „Please enter your real name.“ Without it the Hub and the app showed the generic text.
+- Tests pin the three texts and the form of address.
+
 ## 0.9.5 — 2026-11-16
 
 - Two new UI keys for kratos-flow#73: the confirmation page of a mail link („E-Mail-Adresse bestätigen“) no longer says „Dieser Code ist abgelaufen oder wurde schon benutzt“ when the code is still good but this browser is signed in differently. It shows a warning and the code, and confirms nothing (Alex, 05.11.2026, kratos-flow#21: „Bestätigen“ only with a session of the same account, otherwise a warning plus the code to type where the change was started; never sent by itself).
