@@ -167,6 +167,7 @@
   "4100013": "Bitte trag deinen Vor- und Nachnamen ein.",
   "4100014": "Mit dieser Anmeldung kann hier gerade kein Konto angelegt werden. Bitte wende dich an den Support.",
   "4100015": "Bitte setze das Häkchen, um dein Konto anzulegen.",
+  "4100016": "Bitte gib deinen echten Namen ein.",
   "5000001": "Es ist ein unerwarteter Fehler aufgetreten. Bitte versuch es später erneut.",
   "5000002": "Es sind keine Authentifizierungsmethoden verfügbar. Bitte wende dich an die Systemadministration.",
   "5000003": "Deine Organisation erfordert eine SSO-Anmeldung, aber es ist kein SSO-Anbieter konfiguriert. Bitte wende dich an die Systemadministration."

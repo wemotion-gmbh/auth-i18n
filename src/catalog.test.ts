@@ -1472,6 +1472,16 @@ describe("purpose codes: confirmation, link way, support hints, address change (
     assert.ok(!rendererKeys.includes(key), "kratos-flow does not read it");
   });
 
+  it("has the name blocklist message 4100016 (0.9.6) in Du, Sie and English", () => {
+    const en = readJson<Record<string, string>>("../locales/en.json");
+    // The Du text is the sentence fusion answers with on its own forms (NameBlocklist::MESSAGE).
+    assert.equal(de["4100016"], "Bitte gib deinen echten Namen ein.");
+    assert.equal(deSie["4100016"], "Bitte geben Sie Ihren echten Namen ein.");
+    assert.equal(en["4100016"], "Please enter your real name.");
+    assert.ok(SIE_FORM.test(deSie["4100016"]!));
+    assert.ok(!SIE_FORM.test(de["4100016"]!));
+  });
+
   it("has the message ids of plan appendix A in the Sie and Du form (0.4.0)", () => {
     const en = readJson<Record<string, string>>("../locales/en.json");
     for (const id of ["4100008", "4100009", "4100010", "4100011"]) {
